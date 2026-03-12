@@ -40,8 +40,29 @@ export default function Settings() {
               </div>
               <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
                 <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" defaultChecked />
+                <input 
+                  type="checkbox" 
+                  className="invisible absolute" 
+                  onChange={async (e) => {
+                    if (e.target.checked) {
+                      const { subscribeToPush } = await import('@/lib/push');
+                      await subscribeToPush();
+                    }
+                  }}
+                />
               </label>
+            </div>
+            
+            <div className="p-4 bg-purple-50/50 border-t border-[#f425f4]/5">
+              <button 
+                onClick={async () => {
+                  const res = await fetch('/api/push/send', { method: 'POST' });
+                  if (res.ok) alert('Notification de test envoyée !');
+                }}
+                className="w-full py-2 bg-white border border-purple-200 rounded-xl text-xs font-bold text-purple-600 hover:bg-purple-100 transition-colors"
+              >
+                TESTER LA NOTIFICATION
+              </button>
             </div>
 
             <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">

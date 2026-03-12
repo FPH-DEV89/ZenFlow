@@ -14,3 +14,24 @@ const serwist = new Serwist({
 });
 
 serwist.addEventListeners();
+
+self.addEventListener("push", (event) => {
+    const data = event.data?.json();
+    const title = data?.title || "ZenFlow";
+    const options = {
+        body: data?.body || "Vous avez une nouvelle tâche à traiter.",
+        icon: "/icons/icon-192x192.png",
+        badge: "/icons/icon-192x192.png",
+        data: {
+            url: data?.url || "/",
+        },
+    };
+    event.waitUntil(self.registration.showNotification(title, options));
+});
+
+self.addEventListener("notificationclick", (event) => {
+    event.notification.close();
+    event.waitUntil(
+        self.clients.openWindow(event.notification.data.url)
+    );
+});
