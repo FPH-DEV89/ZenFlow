@@ -1,199 +1,264 @@
 'use client';
 
-import { ArrowLeft, BellRing, Bell, Volume2, Vibrate, Clock, Sun, Moon, UserPlus, CheckSquare, MessageSquare, ChevronRight } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { ArrowLeft, BellRing, Bell, Volume2, Vibrate, Clock, Sun, Moon, UserPlus, CheckSquare, MessageSquare, ChevronRight, Edit2 } from 'lucide-react';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 
 export default function Settings() {
+  const [mounted, setMounted] = useState(false);
+  const [settings, setSettings] = useState({
+    pushEnabled: false,
+    sounds: true,
+    vibration: false,
+    defaultReminder: 10,
+    morningSummaryEnabled: true,
+    morningSummaryTime: '08:00',
+    eveningSummaryEnabled: false,
+    eveningSummaryTime: '21:00',
+    newTasks: true,
+    completedTasks: true,
+    comments: true,
+  });
+
+  const [showReminderPicker, setShowReminderPicker] = useState(false);
+
+  // Load settings from localStorage
+  useEffect(() => {
+    setMounted(true);
+    const savedSettings = localStorage.getItem('zenflow_settings');
+    if (savedSettings) {
+      try {
+        setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
+      } catch (e) {
+        console.error('Failed to parse saved settings', e);
+      }
+    }
+  }, []);
+
+  // Save settings to localStorage
+  useEffect(() => {
+    if (mounted) {
+      localStorage.setItem('zenflow_settings', JSON.stringify(settings));
+    }
+  }, [settings, mounted]);
+
+  const updateSetting = (key: keyof typeof settings, value: any) => {
+    setSettings(prev => ({ ...prev, [key]: value }));
+  };
+
+  if (!mounted) return null;
+
   return (
     <>
-      <header className="sticky top-0 z-10 bg-[#f8f5f8]/80 backdrop-blur-md px-4 py-6 flex items-center justify-between border-b border-[#f425f4]/10">
-        <Link href="/" className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-[#f425f4]/10 transition-colors">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl px-4 py-6 flex items-center justify-between border-b border-[#f425f4]/5">
+        <Link href="/" className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 hover:bg-[#f425f4]/10 transition-all active:scale-90">
           <ArrowLeft size={24} className="text-slate-900" />
         </Link>
-        <h1 className="text-xl font-bold tracking-tight text-center flex-1">Paramètres de Notifications</h1>
+        <h1 className="text-xl font-black tracking-tight text-center flex-1 bg-gradient-to-r from-slate-900 to-[#f425f4] bg-clip-text text-transparent italic">Zen Réglages</h1>
         <div className="w-10 h-10"></div>
       </header>
 
-      <main className="flex-1 overflow-y-auto pb-24">
-        <div className="px-4 py-6">
-          <div className="bg-gradient-to-r from-[#f425f4]/20 to-[#f425f4]/5 rounded-2xl p-4 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-full bg-[#f425f4] flex items-center justify-center text-white">
-              <BellRing size={24} />
+      <main className="flex-1 overflow-y-auto pb-32 bg-[#fcfafc]">
+        <div className="px-4 py-8">
+          <div className="bg-gradient-to-br from-white to-[#f425f4]/5 rounded-[2.5rem] p-6 flex flex-col items-center text-center shadow-xl shadow-purple-100/50 border border-white relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-[#f425f4]/10 blur-[50px] rounded-full -mr-16 -mt-16"></div>
+            <div className="w-20 h-20 rounded-3xl bg-[#f425f4] flex items-center justify-center text-white shadow-2xl shadow-purple-300 relative z-10 mb-4 transform -rotate-3">
+              <BellRing size={40} strokeWidth={1.5} />
             </div>
-            <div>
-              <h2 className="font-semibold">ZenFlow Focus</h2>
-              <p className="text-sm opacity-70">Gérez vos interruptions intelligemment.</p>
-            </div>
+            <h2 className="text-2xl font-black text-slate-900 mb-1">Concentration Zen</h2>
+            <p className="text-slate-500 text-sm max-w-[200px]">Votre temps est précieux. Gérez vos rappels avec soin.</p>
           </div>
         </div>
 
-        <section className="px-4 mb-8">
-          <h3 className="text-[#f425f4] font-bold text-sm uppercase tracking-widest mb-4 px-2">Alertes Générales</h3>
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#f425f4]/5">
-            <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <Bell size={20} />
+        <section className="px-4 mb-10">
+          <h3 className="text-[#f425f4] font-black text-[10px] uppercase tracking-[0.2em] mb-4 px-4 opacity-50">Notifications & Sons</h3>
+          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-[#f425f4]/5">
+            <div className="flex items-center justify-between p-5 border-b border-slate-50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-[#f425f4] flex items-center justify-center shadow-inner">
+                  <Bell size={24} />
                 </div>
-                <span className="font-medium">Notifications Push</span>
+                <span className="font-bold text-slate-800">Alertes Push</span>
               </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
+              <label className="relative flex h-[34px] w-[56px] cursor-pointer items-center rounded-full p-1 transition-all duration-300" style={{ backgroundColor: settings.pushEnabled ? '#f425f4' : '#e2e8f0' }}>
+                <div className={`h-[26px] w-[26px] rounded-full bg-white shadow-md transform transition-transform duration-300 ease-spring ${settings.pushEnabled ? 'translate-x-[22px]' : 'translate-x-0'}`}></div>
                 <input 
                   type="checkbox" 
-                  className="invisible absolute" 
+                  className="invisible absolute"
+                  checked={settings.pushEnabled}
                   onChange={async (e) => {
-                    if (e.target.checked) {
+                    const checked = e.target.checked;
+                    if (checked) {
                       const { subscribeToPush } = await import('@/lib/push');
                       const success = await subscribeToPush();
                       if (success) {
-                        alert('Notifications activées avec succès ! 🎉');
-                      } else {
-                        e.target.checked = false;
+                        updateSetting('pushEnabled', true);
                       }
+                    } else {
+                      updateSetting('pushEnabled', false);
                     }
                   }}
                 />
               </label>
             </div>
             
-            <div className="p-4 bg-purple-50/50 border-t border-[#f425f4]/5">
+            <div className="p-4 bg-purple-50/20 border-b border-slate-50">
               <button 
                 onClick={async () => {
                   const res = await fetch('/api/push/send', { method: 'POST' });
-                  if (res.ok) alert('Notification de test envoyée !');
+                  if (!res.ok) alert('Activez les notifications pour tester.');
                 }}
-                className="w-full py-2 bg-white border border-purple-200 rounded-xl text-xs font-bold text-purple-600 hover:bg-purple-100 transition-colors"
+                className="w-full py-3.5 bg-white border-2 border-purple-100 rounded-2xl text-[10px] font-black tracking-widest text-[#f425f4] hover:bg-white hover:shadow-lg active:scale-95 transition-all"
               >
-                TESTER LA NOTIFICATION
+                ENVOYER UN TEST
               </button>
             </div>
 
-            <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <Volume2 size={20} />
+            <div className="flex items-center justify-between p-5 border-b border-slate-50">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-[#f425f4] flex items-center justify-center shadow-inner">
+                  <Volume2 size={24} />
                 </div>
-                <span className="font-medium">Sons</span>
+                <span className="font-bold text-slate-800">Sons de l'app</span>
               </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" defaultChecked />
+              <label className="relative flex h-[34px] w-[56px] cursor-pointer items-center rounded-full p-1 transition-all duration-300" style={{ backgroundColor: settings.sounds ? '#f425f4' : '#e2e8f0' }}>
+                <div className={`h-[26px] w-[26px] rounded-full bg-white shadow-md transform transition-transform duration-300 ease-spring ${settings.sounds ? 'translate-x-[22px]' : 'translate-x-0'}`}></div>
+                <input type="checkbox" className="invisible absolute" checked={settings.sounds} onChange={(e) => updateSetting('sounds', e.target.checked)} />
               </label>
             </div>
 
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <Vibrate size={20} />
+            <div className="flex items-center justify-between p-5 opacity-30 grayscale cursor-not-allowed">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-slate-50 text-slate-400 flex items-center justify-center">
+                  <Vibrate size={24} />
                 </div>
-                <span className="font-medium">Vibration</span>
+                <div className="flex flex-col">
+                  <span className="font-bold text-slate-800">Vibrations</span>
+                  <span className="text-[10px] font-black tracking-tighter">BIENTÔT</span>
+                </div>
               </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" />
-              </label>
+              <div className="h-[34px] w-[56px] rounded-full bg-slate-100"></div>
             </div>
           </div>
         </section>
 
-        <section className="px-4 mb-8">
-          <h3 className="text-[#f425f4] font-bold text-sm uppercase tracking-widest mb-4 px-2">Rappels de Tâches</h3>
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#f425f4]/5">
-            <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <Clock size={20} />
+        <section className="px-4 mb-10">
+          <h3 className="text-[#f425f4] font-black text-[10px] uppercase tracking-[0.2em] mb-4 px-4 opacity-50">Timing & Rappels</h3>
+          <div className="bg-white rounded-[2rem] overflow-hidden shadow-sm border border-[#f425f4]/5">
+            {/* Default Reminder Picker */}
+            <div 
+              onClick={() => setShowReminderPicker(!showReminderPicker)}
+              className="flex items-center justify-between p-5 border-b border-slate-50 cursor-pointer hover:bg-slate-50/50 transition-all group"
+            >
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                  <Clock size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-medium">Rappel par défaut</span>
-                  <span className="text-xs opacity-60 text-slate-500">10 minutes avant</span>
+                  <span className="font-bold text-slate-800">Rappel par défaut</span>
+                  <span className="text-sm text-[#f425f4] font-black mt-0.5">{settings.defaultReminder} minutes avant</span>
                 </div>
               </div>
-              <ChevronRight size={20} className="text-slate-400" />
+              <div className="flex items-center gap-2">
+                 <Edit2 size={14} className="text-slate-300 group-hover:text-[#f425f4] transition-colors" />
+                 <ChevronRight size={20} className={`text-slate-200 transition-all ${showReminderPicker ? 'rotate-90 text-[#f425f4]' : ''}`} />
+              </div>
             </div>
 
-            <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <Sun size={20} />
+            {showReminderPicker && (
+              <div className="bg-slate-50/50 p-4 flex flex-wrap gap-2 justify-center border-b border-slate-100 animate-in fade-in slide-in-from-top-2 duration-300">
+                {[5, 10, 15, 30, 60].map(min => (
+                  <button
+                    key={min}
+                    onClick={() => {
+                      updateSetting('defaultReminder', min);
+                      setShowReminderPicker(false);
+                    }}
+                    className={`h-12 w-16 flex items-center justify-center rounded-2xl text-xs font-black transition-all transform active:scale-90 ${settings.defaultReminder === min ? 'bg-[#f425f4] text-white shadow-lg shadow-purple-200' : 'bg-white text-slate-500 border border-slate-100 hover:border-[#f425f4]/30'}`}
+                  >
+                    {min}M
+                  </button>
+                ))}
+              </div>
+            )}
+
+            {/* Morning Summary */}
+            <div className="flex items-center justify-between p-5 border-b border-slate-50 relative overflow-hidden group">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-50 text-amber-500 flex items-center justify-center shadow-inner group-hover:rotate-12 transition-transform">
+                  <Sun size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-medium">Résumé du matin</span>
-                  <span className="text-xs opacity-60 text-slate-500">Reçu à 08:00</span>
+                  <span className="font-bold text-slate-800">Résumé du matin</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-sm text-[#f425f4] font-black">{settings.morningSummaryTime}</span>
+                    <Edit2 size={10} className="text-slate-300" />
+                  </div>
                 </div>
               </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" defaultChecked />
-              </label>
+              <div className="flex items-center gap-4">
+                <input 
+                  type="time" 
+                  className="absolute inset-x-0 top-0 bottom-0 opacity-0 cursor-pointer z-10 w-[75%]"
+                  value={settings.morningSummaryTime}
+                  onChange={(e) => updateSetting('morningSummaryTime', e.target.value)}
+                />
+                <label className="relative flex h-[34px] w-[56px] cursor-pointer items-center rounded-full p-1 transition-all duration-300 z-20" style={{ backgroundColor: settings.morningSummaryEnabled ? '#f425f4' : '#e2e8f0' }}>
+                  <div className={`h-[26px] w-[26px] rounded-full bg-white shadow-md transform transition-transform duration-300 ease-spring ${settings.morningSummaryEnabled ? 'translate-x-[22px]' : 'translate-x-0'}`}></div>
+                  <input type="checkbox" className="invisible absolute" checked={settings.morningSummaryEnabled} onChange={(e) => updateSetting('morningSummaryEnabled', e.target.checked)} />
+                </label>
+              </div>
             </div>
 
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <Moon size={20} />
+            {/* Evening Summary */}
+            <div className="flex items-center justify-between p-5 relative overflow-hidden group">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-500 flex items-center justify-center shadow-inner group-hover:-rotate-12 transition-transform">
+                  <Moon size={24} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="font-medium">Bilan du soir</span>
-                  <span className="text-xs opacity-60 text-slate-500">Reçu à 21:00</span>
+                  <span className="font-bold text-slate-800">Bilan du soir</span>
+                  <div className="flex items-center gap-1.5 mt-0.5">
+                    <span className="text-sm text-[#f425f4] font-black">{settings.eveningSummaryTime}</span>
+                    <Edit2 size={10} className="text-slate-300" />
+                  </div>
                 </div>
               </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" />
-              </label>
+              <div className="flex items-center gap-4">
+                <input 
+                  type="time" 
+                  className="absolute inset-x-0 top-0 bottom-0 opacity-0 cursor-pointer z-10 w-[75%]"
+                  value={settings.eveningSummaryTime}
+                  onChange={(e) => updateSetting('eveningSummaryTime', e.target.value)}
+                />
+                <label className="relative flex h-[34px] w-[56px] cursor-pointer items-center rounded-full p-1 transition-all duration-300 z-20" style={{ backgroundColor: settings.eveningSummaryEnabled ? '#f425f4' : '#e2e8f0' }}>
+                  <div className={`h-[26px] w-[26px] rounded-full bg-white shadow-md transform transition-transform duration-300 ease-spring ${settings.eveningSummaryEnabled ? 'translate-x-[22px]' : 'translate-x-0'}`}></div>
+                  <input type="checkbox" className="invisible absolute" checked={settings.eveningSummaryEnabled} onChange={(e) => updateSetting('eveningSummaryEnabled', e.target.checked)} />
+                </label>
+              </div>
             </div>
           </div>
         </section>
 
-        <section className="px-4 mb-8">
-          <h3 className="text-[#f425f4] font-bold text-sm uppercase tracking-widest mb-4 px-2">Tâches Partagées</h3>
-          <div className="bg-white rounded-3xl overflow-hidden shadow-sm border border-[#f425f4]/5">
-            <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <UserPlus size={20} />
-                </div>
-                <span className="font-medium">Nouvelles tâches</span>
-              </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" defaultChecked />
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border-b border-[#f425f4]/5">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <CheckSquare size={20} />
-                </div>
-                <span className="font-medium">Tâches terminées</span>
-              </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" defaultChecked />
-              </label>
-            </div>
-
-            <div className="flex items-center justify-between p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-[#f425f4]/10 text-[#f425f4] flex items-center justify-center">
-                  <MessageSquare size={20} />
-                </div>
-                <span className="font-medium">Commentaires</span>
-              </div>
-              <label className="relative flex h-[31px] w-[51px] cursor-pointer items-center rounded-full border-none bg-slate-200 p-0.5 has-[:checked]:justify-end has-[:checked]:bg-[#f425f4] transition-all">
-                <div className="h-full w-[27px] rounded-full bg-white shadow-md"></div>
-                <input type="checkbox" className="invisible absolute" defaultChecked />
-              </label>
-            </div>
+        <section className="px-4 mb-20 grayscale opacity-40">
+           <div className="flex items-center justify-between px-4 mb-4">
+             <h3 className="text-[#f425f4] font-black text-[10px] uppercase tracking-[0.2em] mt-2">Partage & Équipe</h3>
+             <span className="text-[10px] bg-slate-900 text-white px-2.5 py-1 rounded-full font-black tracking-tighter">LOCK</span>
+           </div>
+          <div className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm p-4 text-center">
+            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Fonctionnalités Collaboratives</p>
+            <p className="text-xs text-slate-400 mt-1 italic">Revenez bientôt pour synchroniser votre ZenFlow.</p>
           </div>
         </section>
       </main>
 
       <BottomNav />
+      <style jsx global>{`
+        .ease-spring {
+          transition-timing-function: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+      `}</style>
     </>
   );
 }
