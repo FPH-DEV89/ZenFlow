@@ -13,10 +13,14 @@ export async function subscribeToPush() {
     
     if (!subscription) {
       const response = await fetch('/api/push/public-key');
-      const { publicKey } = await response.json();
+      const data = await response.json();
       
-      const convertedVapidKey = urlBase64ToUint8Array(publicKey);
-      console.log('Requesting subscription with public key:', publicKey);
+      if (!response.ok || !data.publicKey) {
+        throw new Error(data.error || "La clé publique VAPID n'a pas été trouvée sur le serveur. Vérifiez vos variables d'environnement Vercel.");
+      }
+      
+      const convertedVapidKey = urlBase64ToUint8Array(data.publicKey);
+      console.log('Requesting subscription with public key:', data.publicKey);
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey
