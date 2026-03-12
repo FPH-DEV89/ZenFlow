@@ -42,11 +42,17 @@ export async function POST(request: Request) {
       url: '/'
     });
 
+    console.log('Attempting to send notification to user:', user.id);
     await webpush.sendNotification(subData.subscription, payload);
+    console.log('Notification sent successfully to user:', user.id);
 
-    return NextResponse.json({ success: true });
-  } catch (err) {
+    return NextResponse.json({ success: true, message: 'Notification envoyée avec succès.' });
+  } catch (err: any) {
     console.error('Error sending test notification:', err);
-    return NextResponse.json({ error: 'Failed to send notification' }, { status: 500 });
+    return NextResponse.json({ 
+      error: 'Échec de l\'envoi de la notification', 
+      details: err.message,
+      statusCode: err.statusCode || 500
+    }, { status: 500 });
   }
 }

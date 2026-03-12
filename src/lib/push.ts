@@ -16,15 +16,16 @@ export async function subscribeToPush() {
       const { publicKey } = await response.json();
       
       const convertedVapidKey = urlBase64ToUint8Array(publicKey);
-      
+      console.log('Requesting subscription with public key:', publicKey);
       subscription = await registration.pushManager.subscribe({
         userVisibleOnly: true,
         applicationServerKey: convertedVapidKey
       });
+      console.log('Push subscription object:', subscription);
     }
 
-    // Send subscription to server
-    await fetch('/api/push/subscribe', {
+    console.log('Sending subscription to server...');
+    const subResponse = await fetch('/api/push/subscribe', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -32,10 +33,16 @@ export async function subscribeToPush() {
       body: JSON.stringify(subscription),
     });
 
+    if (!subResponse.ok) {
+      const errorData = await subResponse.json();
+      throw new Error(`Server failed to save subscription: ${errorData.error}`);
+    }
+
     console.log('Successfully subscribed to push notifications');
     return true;
   } catch (error) {
     console.error('Failed to subscribe to push notifications:', error);
+    alert(`Erreur d'abonnement : ${error instanceof Error ? error.message : 'Inconnue'}`);
     return false;
   }
 }

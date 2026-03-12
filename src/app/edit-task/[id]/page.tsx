@@ -160,8 +160,8 @@ export default function EditTask() {
                 ))}
               </div>
             </div>
-
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 relative cursor-pointer hover:bg-slate-50 transition-colors">
+            {/* Date & Time Selectors */}
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 relative cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden">
                <div className="min-w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-blue-500">
                  <Calendar size={18} />
                </div>
@@ -171,12 +171,15 @@ export default function EditTask() {
                    type="date"
                    value={dueDate}
                    onChange={(e) => setDueDate(e.target.value)}
-                   className="w-full text-sm font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none"
+                   className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
                  />
+                 <div className="text-sm font-semibold text-slate-700">
+                   {dueDate || 'Sélectionner'}
+                 </div>
                </div>
             </div>
 
-            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 relative cursor-pointer hover:bg-slate-50 transition-colors">
+            <div className="bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex items-center gap-3 relative cursor-pointer hover:bg-slate-50 transition-colors overflow-hidden">
                <div className="min-w-10 h-10 rounded-full bg-slate-50 flex items-center justify-center text-slate-400">
                  <Clock size={18} />
                </div>
@@ -186,8 +189,11 @@ export default function EditTask() {
                    type="time"
                    value={dueTime}
                    onChange={(e) => setDueTime(e.target.value)}
-                   className="w-full text-sm font-semibold text-slate-700 bg-transparent outline-none cursor-pointer appearance-none"
+                   className="absolute inset-0 w-full h-full opacity-0 z-20 cursor-pointer"
                  />
+                 <div className="text-sm font-semibold text-slate-700">
+                   {dueTime || 'Sélectionner'}
+                 </div>
                </div>
             </div>
             
