@@ -1,5 +1,4 @@
-
-import { createClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 import webpush from 'web-push';
 
@@ -18,7 +17,7 @@ export async function POST(request: Request) {
   );
 
   try {
-    const supabase = createClient();
+    const supabase = createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
 
     if (!user) {

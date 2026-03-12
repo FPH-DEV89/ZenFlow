@@ -1,11 +1,11 @@
 
-import { createClient } from '@/lib/supabase';
+import { createServerSupabaseClient } from '@/lib/supabase';
 import { NextResponse } from 'next/server';
 
 export async function POST(request: Request) {
   try {
     const subscription = await request.json();
-    const supabase = createClient();
+    const supabase = createServerSupabaseClient();
     
     const { data: { user } } = await supabase.auth.getUser();
     
