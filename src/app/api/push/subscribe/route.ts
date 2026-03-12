@@ -13,13 +13,18 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
+    // Delete existing subscription for this user to avoid duplicates
+    await supabase
+      .from('push_subscriptions')
+      .delete()
+      .eq('user_id', user.id);
+
+    // Insert new subscription
     const { error } = await supabase
       .from('push_subscriptions')
-      .upsert({
+      .insert({
         user_id: user.id,
         subscription: subscription,
-      }, {
-        onConflict: 'user_id' // Assuming one subscription per user for simplicity
       });
 
     if (error) {
