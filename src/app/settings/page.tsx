@@ -46,7 +46,12 @@ export default function Settings() {
                   onChange={async (e) => {
                     if (e.target.checked) {
                       const { subscribeToPush } = await import('@/lib/push');
-                      await subscribeToPush();
+                      const success = await subscribeToPush();
+                      if (success) {
+                        alert('Notifications activées avec succès ! 🎉');
+                      } else {
+                        e.target.checked = false;
+                      }
                     }
                   }}
                 />
