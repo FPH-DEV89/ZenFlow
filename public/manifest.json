@@ -1,0 +1,21 @@
+{
+  "name": "ZenFlow - Votre Allié Sérénité",
+  "short_name": "ZenFlow",
+  "description": "L'application de To-Do list qui réduit votre charge mentale.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#3b82f6",
+  "icons": [
+    {
+      "src": "/icons/icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "/icons/icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
