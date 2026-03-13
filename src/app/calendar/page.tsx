@@ -26,8 +26,31 @@ export default function CalendarPage() {
   const emptySlots = Array.from({ length: firstDayOfMonth });
   const daySlots = Array.from({ length: daysInMonth }, (_, i) => i + 1);
 
-  // Tasks created today (since we don't have per-day scheduling yet, show all non-completed)
-  const todayTasks = useMemo(() => tasks.filter(t => !t.completed), [tasks]);
+  const selectedDateStr = useMemo(() => {
+    const y = currentYear;
+    const m = String(currentMonth + 1).padStart(2, '0');
+    const d = String(selectedDay).padStart(2, '0');
+    return `${y}-${m}-${d}`;
+  }, [currentYear, currentMonth, selectedDay]);
+
+  const todayTasks = useMemo(() => {
+    return tasks
+      .filter(t => !t.completed && t.due_date === selectedDateStr)
+      .sort((a, b) => {
+        if (!a.due_time) return -1;
+        if (!b.due_time) return 1;
+        return a.due_time.localeCompare(b.due_time);
+      });
+  }, [tasks, selectedDateStr]);
+
+  const daysWithTasks = useMemo(() => {
+    const activeTasks = tasks.filter(t => !t.completed && t.due_date);
+    const days = new Set<string>();
+    activeTasks.forEach(t => {
+      if (t.due_date) days.add(t.due_date);
+    });
+    return days;
+  }, [tasks]);
 
   const prevMonth = () => {
     if (currentMonth === 0) { setCurrentMonth(11); setCurrentYear(y => y - 1); }
@@ -120,11 +143,18 @@ export default function CalendarPage() {
 
           {todayTasks.map((task, i) => {
             const style = categoryStyle(task.category);
+            const timeStr = task.due_time || '--:--';
+            let ampm = '';
+            if (task.due_time) {
+               const hours = parseInt(task.due_time.split(':')[0], 10);
+               ampm = !isNaN(hours) ? (hours >= 12 ? 'PM' : 'AM') : '';
+            }
+
             return (
               <div key={task.id || i} className="flex gap-4">
                 <div className="w-16 flex flex-col items-center pt-2">
-                  <span className="text-sm font-bold">{String(8 + i * 2).padStart(2, '0')}:00</span>
-                  <span className="text-xs text-slate-400">{(8 + i * 2) < 12 ? 'AM' : 'PM'}</span>
+                  <span className="text-sm font-bold">{timeStr}</span>
+                  <span className="text-xs text-slate-400">{ampm}</span>
                 </div>
                 <div className={`flex-1 bg-white p-4 rounded-xl border-l-4 ${style.border} shadow-sm`}>
                   <div className="flex justify-between items-start mb-1">
@@ -144,8 +174,7 @@ export default function CalendarPage() {
 
           <Link href="/new-task" className="flex gap-4">
             <div className="w-16 flex flex-col items-center pt-2">
-              <span className="text-sm font-bold">{String(8 + todayTasks.length * 2).padStart(2, '0')}:00</span>
-              <span className="text-xs text-slate-400">{(8 + todayTasks.length * 2) < 12 ? 'AM' : 'PM'}</span>
+              <span className="text-sm font-bold text-slate-300">--:--</span>
             </div>
             <div className="flex-1 border-2 border-dashed border-slate-200 p-4 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:border-[#f425f4]/50 hover:text-[#f425f4] transition-colors cursor-pointer">
               <PlusCircle size={20} />
