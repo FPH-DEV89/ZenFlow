@@ -232,6 +232,7 @@ export default function NewTask() {
                         : "bg-white text-slate-500 border-slate-100 hover:border-indigo-200"
                     )}
                   >
+                    {r === 'none' ? 'Jamais' : r === 'daily' ? 'Quotidienne' : r === 'weekly' ? 'Hebdomadaire' : 'Mensuelle'}
                   </button>
                 ))}
               </div>
