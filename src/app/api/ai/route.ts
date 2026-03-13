@@ -128,10 +128,10 @@ Instructions importantes :
 
     return NextResponse.json({ content: text });
   } catch (error: any) {
-    console.error("AI Error Details:", error.message || error);
+    console.error("[ZENIA DEBUG ERROR]", error);
+    // On renvoie l'erreur réelle temporairement pour le debug
     return NextResponse.json({ 
-      error: "Désolé, Zenia se repose un instant.",
-      details: error.message 
+      error: `Erreur Backend : ${error.message || "Inconnue"}` 
     }, { status: 500 });
   }
 }
