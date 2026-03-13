@@ -59,8 +59,7 @@ export async function POST(req: Request) {
     }
 
     const genAI = new GoogleGenerativeAI(apiKey);
-    const model = genAI.getGenerativeModel({ model: "gemini-2.5-flash" });
-
+    
     const nowInParis = new Date().toLocaleString("fr-FR", { timeZone: "Europe/Paris" });
     const todayISO = new Date().toISOString().split('T')[0];
 
@@ -84,6 +83,11 @@ Instructions importantes :
 - Utilise le tutoiement pour créer une proximité zen.
 `;
 
+    const model = genAI.getGenerativeModel({ 
+      model: "gemini-1.5-flash",
+      systemInstruction: systemPrompt
+    });
+
     const chatHistory = messages.slice(0, -1)
       .filter((m: any) => m.role === 'user' || m.role === 'assistant')
       .map((m: any) => ({
@@ -105,10 +109,9 @@ Instructions importantes :
     });
 
     const userMessage = messages[messages.length - 1].content;
-    const promptWithContext = `${systemPrompt}\n\nUtilisateur : ${userMessage}`;
     
-    console.log("Sending prompt to Gemini...");
-    const result = await chat.sendMessage(promptWithContext);
+    console.log("Sending message to Zenia...");
+    const result = await chat.sendMessage(userMessage);
     const response = await result.response;
     const text = response.text();
     console.log("Gemini response received.");
