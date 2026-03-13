@@ -55,6 +55,8 @@ export async function GET(request: Request) {
       
     if (tasksError) throw tasksError;
     
+    const tasksToNotify = [];
+    
     // 5. Filtrage précis de l'imminence (15-16 minutes)
     for (const task of tasks || []) {
        if (task.due_time) {
