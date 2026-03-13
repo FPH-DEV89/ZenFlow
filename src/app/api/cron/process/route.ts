@@ -28,11 +28,24 @@ export async function GET(request: Request) {
   try {
     const supabase = createAdminSupabaseClient();
     
-    // Obtenir la date actuelle "YYYY-MM-DD"
+    // 3. Calcul du temps précis en Europe/Paris (pour Vercel UTC)
     const now = new Date();
-    const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+    const parisFormatter = new Intl.DateTimeFormat('en-GB', {
+      timeZone: 'Europe/Paris',
+      year: 'numeric', month: '2-digit', day: '2-digit',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      hour12: false
+    });
     
-    // 3. Récupérer les tâches de la journée, non terminées, dont on n'a pas encore envoyé de notif
+    const parts = parisFormatter.formatToParts(now);
+    const getPart = (type: string) => parts.find(p => p.type === type)?.value || '';
+    
+    const todayStr = `${getPart('year')}-${getPart('month')}-${getPart('day')}`;
+    const currentH = Number(getPart('hour'));
+    const currentM = Number(getPart('minute'));
+    const nowInMins = currentH * 60 + currentM;
+    
+    // 4. Récupérer les tâches de la journée, non terminées, dont on n'a pas encore envoyé de notif
     const { data: tasks, error: tasksError } = await supabase
       .from('tasks')
       .select('*')
@@ -42,17 +55,14 @@ export async function GET(request: Request) {
       
     if (tasksError) throw tasksError;
     
-    const tasksToNotify = [];
-    const nowMs = now.getTime();
-    
-    // 4. Filtrage précis de l'imminence (15 minutes)
+    // 5. Filtrage précis de l'imminence (15-16 minutes)
     for (const task of tasks || []) {
        if (task.due_time) {
-          const [hours, mins] = task.due_time.split(':').map(Number);
-          const taskTime = new Date(now.getFullYear(), now.getMonth(), now.getDate(), hours, mins).getTime();
+          const [taskH, taskM] = task.due_time.split(':').map(Number);
+          const taskInMins = taskH * 60 + taskM;
           
-          // Différence en minutes
-          const diffMins = (taskTime - nowMs) / (1000 * 60);
+          // Différence en minutes par rapport à l'heure de Paris
+          const diffMins = taskInMins - nowInMins;
           
           // Si la tâche arrive dans <= 16 minutes, ou est en retard depuis moins de 60 minutes
           if (diffMins <= 16 && diffMins >= -60) {

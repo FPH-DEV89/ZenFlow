@@ -3,6 +3,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { FolderOpen, UserPlus, Briefcase, Heart, Users, CheckCircle2 } from 'lucide-react';
 import Image from 'next/image';
+import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
 import { getAllTasks, type Task } from '@/lib/db';
 
@@ -114,9 +115,9 @@ export default function Projects() {
         <div className="mt-8 bg-gradient-to-r from-[#f425f4] to-purple-600 rounded-lg p-6 text-white text-center">
           <h3 className="text-lg font-bold mb-2">Agrandissez votre équipe</h3>
           <p className="text-sm text-white/80 mb-4">Collaborez mieux en invitant vos proches à vos projets.</p>
-          <button className="bg-white text-[#f425f4] font-bold px-6 py-2 rounded-full shadow-lg">
+          <Link href="/family" className="inline-block bg-white text-[#f425f4] font-bold px-6 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors">
             Inviter des amis
-          </button>
+          </Link>
         </div>
       </section>
 
