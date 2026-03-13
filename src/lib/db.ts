@@ -47,7 +47,10 @@ export interface SubTask {
 
 const supabase = createClient();
 
-export async function addTask(task: Omit<Task, 'id' | 'created_at' | 'completed' | 'user_id'>) {
+export async function addTask(
+  task: Omit<Task, 'id' | 'created_at' | 'completed' | 'user_id'>,
+  subtasks?: string[]
+) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
 
@@ -61,16 +64,36 @@ export async function addTask(task: Omit<Task, 'id' | 'created_at' | 'completed'
     nextGenDate = d.toISOString().split('T')[0];
   }
   
-  const { error } = await supabase
+  const { data: newTask, error } = await supabase
     .from('tasks')
     .insert({
       ...task,
       user_id: user.id,
       completed: false,
       next_generation_date: nextGenDate
-    });
+    })
+    .select()
+    .single();
   
-  if (error) console.error('Error adding task:', error.message);
+  if (error) {
+    console.error('Error adding task:', error.message);
+    return;
+  }
+
+  if (subtasks && subtasks.length > 0 && newTask) {
+    const subtasksToInsert = subtasks.map((title, index) => ({
+      task_id: newTask.id,
+      title,
+      position: index,
+      completed: false
+    }));
+    
+    const { error: subError } = await supabase
+      .from('subtasks')
+      .insert(subtasksToInsert);
+      
+    if (subError) console.error('Error adding initial subtasks:', subError.message);
+  }
 }
 
 export async function getAllTasks(): Promise<Task[]> {

@@ -159,7 +159,9 @@ export default function CalendarPage() {
                 <div className={`flex-1 bg-white p-4 rounded-xl border-l-4 ${style.border} shadow-sm`}>
                   <div className="flex justify-between items-start mb-1">
                     <h4 className="font-bold text-slate-900">{task.title}</h4>
-                    <MoreVertical size={16} className="text-slate-300" />
+                    <Link href={`/edit-task/${task.id}`}>
+                      <MoreVertical size={16} className="text-slate-300 hover:text-[#f425f4] transition-colors" />
+                    </Link>
                   </div>
                   <p className="text-xs text-slate-500 mb-3">
                     {task.priority === 'high' ? '🔥 Urgence' : task.priority === 'low' ? '🌱 Optionnel' : '⚡ Normal'}

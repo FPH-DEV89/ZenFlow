@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Calendar, Clock, Flag, Hash } from 'lucide-react';
+import { X, Send, Calendar, Clock, Flag, Hash, Plus, Trash2, CheckCircle2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { addTask, getUserGroups, Group } from '@/lib/db';
@@ -25,6 +25,8 @@ export default function NewTask() {
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
+  const [subtasks, setSubtasks] = useState<string[]>([]);
+  const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
 
   // Auto-focus on load for zero friction
   useEffect(() => {
@@ -57,7 +59,7 @@ export default function NewTask() {
         due_time: dueTime || undefined,
         group_id: category === 'shared' ? groupId : undefined,
         recurrence: recurrence === 'none' ? undefined : recurrence,
-      });
+      }, subtasks);
       // Redirect back home on success
       router.push('/');
     } catch (error) {
@@ -230,9 +232,70 @@ export default function NewTask() {
                         : "bg-white text-slate-500 border-slate-100 hover:border-indigo-200"
                     )}
                   >
-                    {r === 'none' ? 'Jamais' : r === 'daily' ? 'Quotidienne' : r === 'weekly' ? 'Hebdomadaire' : 'Mensuelle'}
                   </button>
                 ))}
+              </div>
+            </div>
+
+            {/* Subtasks Section */}
+            <div className="col-span-2 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
+              <div className="flex items-center gap-2 text-slate-400">
+                <CheckCircle2 size={16} />
+                <span className="text-xs font-semibold uppercase tracking-wider">Sous-tâches ({subtasks.length})</span>
+              </div>
+              
+              <div className="space-y-2">
+                <AnimatePresence>
+                  {subtasks.map((st, index) => (
+                    <motion.div 
+                      key={index}
+                      initial={{ opacity: 0, x: -10 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      exit={{ opacity: 0, x: 10 }}
+                      className="flex items-center justify-between bg-slate-50 p-3 rounded-xl border border-slate-100 group"
+                    >
+                      <span className="text-sm text-slate-700 font-medium truncate flex-1">{st}</span>
+                      <button 
+                        type="button" 
+                        onClick={() => setSubtasks(prev => prev.filter((_, i) => i !== index))}
+                        className="text-slate-300 hover:text-red-500 transition-colors p-1"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </motion.div>
+                  ))}
+                </AnimatePresence>
+              </div>
+
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={newSubtaskTitle}
+                  onChange={(e) => setNewSubtaskTitle(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      if (newSubtaskTitle.trim()) {
+                        setSubtasks(prev => [...prev, newSubtaskTitle.trim()]);
+                        setNewSubtaskTitle('');
+                      }
+                    }
+                  }}
+                  placeholder="Ajouter une étape..."
+                  className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-[#f425f4]/20 transition-all"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    if (newSubtaskTitle.trim()) {
+                      setSubtasks(prev => [...prev, newSubtaskTitle.trim()]);
+                      setNewSubtaskTitle('');
+                    }
+                  }}
+                  className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#f425f4] hover:text-white transition-all"
+                >
+                  <Plus size={20} />
+                </button>
               </div>
             </div>
             
