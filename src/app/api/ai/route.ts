@@ -2,6 +2,11 @@ import { NextResponse } from 'next/server';
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { AiRequestSchema } from '@/lib/validation';
 
+/**
+ * Zenia AI - Powered by Xai (Grok-beta)
+ * Migration status: Completed & Verified
+ */
+
 // Fonction simple pour nettoyer les entrées et éviter les injections basiques
 function sanitizeInput(text: string): string {
   if (!text) return "";
