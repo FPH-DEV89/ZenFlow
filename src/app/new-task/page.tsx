@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { X, Send, Calendar, Clock, Flag, Hash } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
-import { addTask } from '@/lib/db';
+import { addTask, getUserGroups, Group } from '@/lib/db';
 
 type Priority = 'low' | 'medium' | 'high';
 type Category = 'work' | 'personal' | 'shared';
@@ -21,13 +21,22 @@ export default function NewTask() {
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [userGroups, setUserGroups] = useState<Group[]>([]);
+  const [groupId, setGroupId] = useState<string | undefined>(undefined);
 
   // Auto-focus on load for zero friction
   useEffect(() => {
-    // Petit délai pour laisser l'animation de montage se terminer
     const timer = setTimeout(() => {
       inputRef.current?.focus();
     }, 100);
+    
+    const loadGroups = async () => {
+      const groups = await getUserGroups();
+      setUserGroups(groups);
+      if (groups.length > 0) setGroupId(groups[0].id);
+    };
+    loadGroups();
+    
     return () => clearTimeout(timer);
   }, []);
 
@@ -44,6 +53,7 @@ export default function NewTask() {
         category,
         due_date: dueDate || undefined,
         due_time: dueTime || undefined,
+        group_id: category === 'shared' ? groupId : undefined,
       });
       // Redirect back home on success
       router.push('/');
@@ -115,6 +125,20 @@ export default function NewTask() {
                   </button>
                 ))}
               </div>
+              
+              {category === 'shared' && (
+                <div className="mt-1 flex items-center gap-2 animate-in fade-in slide-in-from-top-1">
+                   {userGroups.length > 0 ? (
+                      <span className="text-[10px] bg-teal-50 text-teal-600 font-bold px-2 py-1 rounded truncate w-full">
+                        Foyer: {userGroups.find(g => g.id === groupId)?.name || 'Défaut'}
+                      </span>
+                   ) : (
+                      <span className="text-[10px] bg-amber-50 text-amber-600 font-bold px-2 py-1 rounded truncate w-full">
+                        ⚠️ Vous n'avez pas encore de Foyer
+                      </span>
+                   )}
+                </div>
+              )}
             </div>
 
             {/* Priority Selector */}

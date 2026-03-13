@@ -7,3 +7,5 @@ node_modules/
 .vsc/
 package-lock.json
 *.log
+
+.vercel

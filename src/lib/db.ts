@@ -5,6 +5,7 @@ import { createClient } from './supabase';
 export interface Task {
   id?: number;
   user_id?: string;
+  group_id?: string;
   title: string;
   category: 'work' | 'personal' | 'shared';
   priority: 'low' | 'medium' | 'high';
@@ -13,6 +14,20 @@ export interface Task {
   created_at?: string;
   completed: boolean;
   notification_sent?: boolean;
+}
+
+export interface Group {
+  id: string;
+  name: string;
+  created_by: string;
+  created_at: string;
+}
+
+export interface GroupMember {
+  group_id: string;
+  user_id: string;
+  role: 'admin' | 'member';
+  created_at: string;
 }
 
 
@@ -85,4 +100,34 @@ export async function updateTask(id: number, updates: Partial<Omit<Task, 'id' | 
     .eq('id', id);
 
   if (error) console.error('Error updating task:', error.message);
+}
+
+export async function createGroup(name: string): Promise<Group | null> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return null;
+  
+  const { data, error } = await supabase
+    .from('groups')
+    .insert({ name, created_by: user.id })
+    .select()
+    .single();
+    
+  if (error) {
+    console.error('Error creating group:', error.message);
+    return null;
+  }
+  return data;
+}
+
+export async function getUserGroups(): Promise<Group[]> {
+  const { data, error } = await supabase
+    .from('groups')
+    .select('*')
+    .order('created_at', { ascending: false });
+    
+  if (error) {
+    console.error('Error fetching groups:', error.message);
+    return [];
+  }
+  return data || [];
 }

@@ -241,15 +241,23 @@ export default function Settings() {
           </div>
         </section>
 
-        <section className="px-4 mb-20 grayscale opacity-40">
+        <section className="px-4 mb-20">
            <div className="flex items-center justify-between px-4 mb-4">
              <h3 className="text-[#f425f4] font-black text-[10px] uppercase tracking-[0.2em] mt-2">Partage & Équipe</h3>
-             <span className="text-[10px] bg-slate-900 text-white px-2.5 py-1 rounded-full font-black tracking-tighter">LOCK</span>
+             <span className="text-[10px] bg-[#f425f4] text-white px-2.5 py-1 rounded-full font-black tracking-tighter shadow-sm">NEW</span>
            </div>
-          <div className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm p-4 text-center">
-            <p className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">Fonctionnalités Collaboratives</p>
-            <p className="text-xs text-slate-400 mt-1 italic">Revenez bientôt pour synchroniser votre ZenFlow.</p>
-          </div>
+           <Link href="/family" className="bg-white rounded-[2rem] overflow-hidden border border-slate-100 shadow-sm p-5 flex items-center justify-between group hover:border-[#f425f4]/30 transition-all cursor-pointer">
+             <div className="flex items-center gap-4">
+               <div className="w-12 h-12 rounded-2xl bg-fuchsia-50 text-[#f425f4] flex items-center justify-center shadow-inner group-hover:scale-110 transition-transform">
+                 <UserPlus size={24} />
+               </div>
+               <div className="flex flex-col">
+                 <span className="font-bold text-slate-800">Mon Foyer partagé</span>
+                 <span className="text-xs text-slate-500 mt-1">Gérer les membres et inviter</span>
+               </div>
+             </div>
+             <ChevronRight size={20} className="text-slate-300 group-hover:text-[#f425f4] group-hover:translate-x-1 transition-all" />
+           </Link>
         </section>
       </main>
 

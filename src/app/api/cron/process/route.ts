@@ -64,7 +64,7 @@ export async function GET(request: Request) {
     let sentCount = 0;
 
     // 5. Envoi groupé des notifications Push
-    const userIds = [...new Set(tasksToNotify.map(t => t.user_id))];
+    const userIds = Array.from(new Set(tasksToNotify.map(t => t.user_id)));
     
     if (userIds.length > 0) {
       // Récupérer les tokens Push des utilisateurs concernés
@@ -81,7 +81,7 @@ export async function GET(request: Request) {
         if (subscription) {
            const payload = JSON.stringify({
              title: `Rappel Imminent: ${task.title} ⏰`,
-             body: task.priority === 'high' ? 'Cette tâche urgente demande votre attention !' : 'Il est bientôt l\\'heure de s\\'y mettre.',
+             body: task.priority === 'high' ? 'Cette tâche urgente demande votre attention !' : "Il est bientôt l'heure de s'y mettre.",
              url: '/'
            });
            
