@@ -76,7 +76,7 @@ ${sanitizedTasks.map(t => `- ${t.title} (${t.priority}, ${t.due_date || 'Sans da
       ...formattedMessages
     ];
 
-    console.log("[ZENIA DEBUG] Sending request to Xai API (grok-beta)...");
+    console.log("[ZENIA DEBUG] Sending request to Xai API (grok-2)...");
     
     const xaiResponse = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
@@ -85,7 +85,7 @@ ${sanitizedTasks.map(t => `- ${t.title} (${t.priority}, ${t.due_date || 'Sans da
         "Authorization": `Bearer ${xaiApiKey}`
       },
       body: JSON.stringify({
-        model: "grok-beta",
+        model: "grok-2",
         messages: chatMessages,
         temperature: 0.7,
         max_tokens: 800
@@ -94,7 +94,9 @@ ${sanitizedTasks.map(t => `- ${t.title} (${t.priority}, ${t.due_date || 'Sans da
 
     if (!xaiResponse.ok) {
       const errorData = await xaiResponse.json();
-      throw new Error(`Xai API Error: ${errorData.error?.message || xaiResponse.statusText}`);
+      console.error("[ZENIA DEBUG] XAI API ERROR:", errorData);
+      // On renvoie le JSON d'erreur complet pour que l'utilisateur puisse me le montrer en screenshot
+      throw new Error(`Xai API Error: ${JSON.stringify(errorData)}`);
     }
 
     const data = await xaiResponse.json();
