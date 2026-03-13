@@ -43,6 +43,9 @@ export async function middleware(request: NextRequest) {
   const isPublicAsset = request.nextUrl.pathname.startsWith('/_next') || 
                         request.nextUrl.pathname.startsWith('/icons') ||
                         request.nextUrl.pathname.startsWith('/api/ai') ||
+                        request.nextUrl.pathname.startsWith('/api/cron') ||
+                        request.nextUrl.pathname.startsWith('/api/family/join') ||
+                        request.nextUrl.pathname === '/join' ||
                         request.nextUrl.pathname === '/manifest.json' ||
                         request.nextUrl.pathname === '/sw.js';
 
