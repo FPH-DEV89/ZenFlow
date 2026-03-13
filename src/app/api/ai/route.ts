@@ -58,13 +58,22 @@ Voici les tâches actuelles de l'utilisateur :
 ${sanitizedTasks.map(t => `- ${t.title} (${t.priority}, ${t.due_date || 'Sans date'})`).join('\n')}
 `;
 
-    // Préparation de l'historique
-    const chatMessages = [
-      { role: "system", content: systemPrompt },
-      ...messages.filter((m: any) => m.content && m.content.trim() !== "").map((m: any) => ({
+    // Préparation de l'historique (Xai/OpenAI requièrent un premier message 'user' après 'system')
+    let formattedMessages = messages
+      .filter((m: any) => m.content && m.content.trim() !== "")
+      .map((m: any) => ({
         role: m.role === "user" ? "user" : "assistant",
         content: m.content
-      }))
+      }));
+
+    // Si le premier message n'est pas 'user', on le retire pour éviter le Bad Request
+    while (formattedMessages.length > 0 && formattedMessages[0].role !== 'user') {
+      formattedMessages.shift();
+    }
+
+    const chatMessages = [
+      { role: "system", content: systemPrompt },
+      ...formattedMessages
     ];
 
     console.log("[ZENIA DEBUG] Sending request to Xai API (grok-beta)...");
