@@ -64,12 +64,17 @@ export default function AIAssistant({ tasks, onTaskAdded }: { tasks: Task[], onT
       });
 
       const data = await res.json();
-      if (data.error) throw new Error(data.error);
+      if (!res.ok) throw new Error(data.error || `Erreur serveur (${res.status})`);
 
       const cleanedContent = await handleAction(data.content);
       setMessages(prev => [...prev, { role: 'assistant', content: cleanedContent }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { role: 'assistant', content: "Désolé, j'ai eu un petit bug. Je médite un instant pour revenir en forme." }]);
+    } catch (error: any) {
+      console.error("[ZENIA FRONTEND ERROR]", error);
+      const errorMsg = error.message?.includes("401") 
+        ? "Ta session semble avoir expiré. Essaie de te reconnecter. 🧘‍♂️" 
+        : `Zenia a un petit souci technique : ${error.message || "Erreur inconnue"}.`;
+      
+      setMessages(prev => [...prev, { role: 'assistant', content: errorMsg }]);
     } finally {
       setIsLoading(false);
     }

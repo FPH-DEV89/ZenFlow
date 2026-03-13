@@ -15,6 +15,7 @@ function sanitizeInput(input: string): string {
 }
 
 export async function POST(req: Request) {
+  console.log("[ZENIA DEBUG] Incoming POST request to /api/ai");
   try {
     const supabase = createServerSupabaseClient();
     const { data: { user } } = await supabase.auth.getUser();
@@ -83,7 +84,10 @@ Instructions importantes :
 
     const model = genAI.getGenerativeModel({ 
       model: "gemini-1.5-flash",
-      systemInstruction: systemPrompt
+      systemInstruction: {
+        role: "system",
+        parts: [{ text: systemPrompt }]
+      }
     });
 
     const chatHistory = messages.slice(0, -1)
