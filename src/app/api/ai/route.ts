@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
 import { createServerSupabaseClient } from '@/lib/supabase-server';
+import { AiRequestSchema } from '@/lib/validation';
 
 /**
  * Assainit une chaîne de caractères pour éviter les injections simples ou les caractères de contrôle.
@@ -24,13 +25,25 @@ export async function POST(req: Request) {
     }
 
     const body = await req.json();
-    const messages = (body.messages || []).map((m: any) => ({
+    
+    // Validation Zod
+    const validation = AiRequestSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ 
+        error: "Format de requête invalide.", 
+        details: validation.error.format() 
+      }, { status: 400 });
+    }
+
+    const { messages: rawMessages, tasks: rawTasks } = validation.data;
+
+    const messages = (rawMessages || []).map((m: any) => ({
       ...m,
       content: sanitizeInput(m.content)
     }));
     
     // On assainit aussi les titres des tâches passées en contexte
-    const tasks = (body.tasks || []).map((t: any) => ({
+    const tasks = (rawTasks || []).map((t: any) => ({
       ...t,
       title: sanitizeInput(t.title)
     }));

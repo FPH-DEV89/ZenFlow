@@ -24,7 +24,8 @@
         "react": "^18.3.1",
         "react-dom": "^18.3.1",
         "tailwind-merge": "^2.6.1",
-        "web-push": "^3.6.7"
+        "web-push": "^3.6.7",
+        "zod": "^4.3.6"
     },
     "devDependencies": {
         "@serwist/webpack-plugin": "^9.0.2",

@@ -1,10 +1,21 @@
-
 import { createServerSupabaseClient } from '@/lib/supabase-server';
 import { NextResponse } from 'next/server';
+import { PushSubscriptionSchema } from '@/lib/validation';
 
 export async function POST(request: Request) {
   try {
-    const subscription = await request.json();
+    const body = await request.json();
+    
+    // Validation Zod
+    const validation = PushSubscriptionSchema.safeParse(body);
+    if (!validation.success) {
+      return NextResponse.json({ 
+        error: "Format de souscription invalide.", 
+        details: validation.error.format() 
+      }, { status: 400 });
+    }
+
+    const subscription = validation.data;
     const supabase = createServerSupabaseClient();
     
     const { data: { user } } = await supabase.auth.getUser();
