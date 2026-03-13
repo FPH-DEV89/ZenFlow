@@ -10,6 +10,7 @@ import { addTask, getUserGroups, Group } from '@/lib/db';
 
 type Priority = 'low' | 'medium' | 'high';
 type Category = 'work' | 'personal' | 'shared';
+type Recurrence = 'daily' | 'weekly' | 'monthly' | 'none';
 
 export default function NewTask() {
   const router = useRouter();
@@ -23,6 +24,7 @@ export default function NewTask() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
+  const [recurrence, setRecurrence] = useState<Recurrence>('none');
 
   // Auto-focus on load for zero friction
   useEffect(() => {
@@ -54,6 +56,7 @@ export default function NewTask() {
         due_date: dueDate || undefined,
         due_time: dueTime || undefined,
         group_id: category === 'shared' ? groupId : undefined,
+        recurrence: recurrence === 'none' ? undefined : recurrence,
       });
       // Redirect back home on success
       router.push('/');
@@ -206,6 +209,31 @@ export default function NewTask() {
                    {dueTime || 'Sélectionner'}
                  </div>
                </div>
+            </div>
+
+            {/* Recurrence Selector */}
+            <div className="col-span-2 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-3">
+              <div className="flex items-center gap-2 text-slate-400">
+                <Hash size={16} />
+                <span className="text-xs font-semibold uppercase tracking-wider">Récurrence (Répétition)</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(['none', 'daily', 'weekly', 'monthly'] as Recurrence[]).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRecurrence(r)}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border",
+                      recurrence === r 
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100"
+                        : "bg-white text-slate-500 border-slate-100 hover:border-indigo-200"
+                    )}
+                  >
+                    {r === 'none' ? 'Jamais' : r === 'daily' ? 'Quotidienne' : r === 'weekly' ? 'Hebdomadaire' : 'Mensuelle'}
+                  </button>
+                ))}
+              </div>
             </div>
             
           </div>

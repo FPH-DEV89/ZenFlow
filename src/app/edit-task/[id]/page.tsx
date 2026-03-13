@@ -3,8 +3,9 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Save, Calendar, Clock, Flag, Hash } from 'lucide-react';
+import { X, Save, Calendar, Clock, Flag, Hash, Repeat } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import SubTaskList from '@/components/SubTaskList';
 
 import { getTask, updateTask } from '@/lib/db';
 
@@ -25,6 +26,7 @@ export default function EditTask() {
   const [dueTime, setDueTime] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [recurrence, setRecurrence] = useState<'daily' | 'weekly' | 'monthly' | 'none'>('none');
 
   useEffect(() => {
     async function loadTask() {
@@ -39,6 +41,7 @@ export default function EditTask() {
         setCategory(task.category);
         setDueDate(task.due_date || '');
         setDueTime(task.due_time || '');
+        setRecurrence(task.recurrence || 'none');
       } else {
         router.push('/');
       }
@@ -60,6 +63,7 @@ export default function EditTask() {
         category,
         due_date: dueDate || null,
         due_time: dueTime || null,
+        recurrence: recurrence === 'none' ? null : recurrence,
       } as any);
       router.push('/');
     } catch (error) {
@@ -197,6 +201,35 @@ export default function EditTask() {
                </div>
             </div>
             
+            {/* Recurrence Selector */}
+            <div className="col-span-2 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-3">
+              <div className="flex items-center gap-2 text-slate-400">
+                <Repeat size={16} />
+                <span className="text-xs font-semibold uppercase tracking-wider">Récurrence</span>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                {(['none', 'daily', 'weekly', 'monthly'] as const).map((r) => (
+                  <button
+                    key={r}
+                    type="button"
+                    onClick={() => setRecurrence(r)}
+                    className={cn(
+                      "px-4 py-2 rounded-xl text-xs font-bold transition-all duration-200 border",
+                      recurrence === r 
+                        ? "bg-indigo-600 text-white border-indigo-600 shadow-md shadow-indigo-100"
+                        : "bg-white text-slate-500 border-slate-100 hover:border-indigo-200"
+                    )}
+                  >
+                    {r === 'none' ? 'Jamais' : r === 'daily' ? 'Quotidienne' : r === 'weekly' ? 'Hebdomadaire' : 'Mensuelle'}
+                  </button>
+                ))}
+              </div>
+            </div>
+            
+          </div>
+
+          <div className="mt-8">
+            <SubTaskList taskId={taskId} />
           </div>
 
           <motion.button

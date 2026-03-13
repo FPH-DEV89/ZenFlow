@@ -114,7 +114,56 @@ export async function GET(request: Request) {
       }
     }
 
-    return NextResponse.json({ success: true, processedTasks: sentCount, evaluatedTasks: tasksToNotify.length });
+    // 7. Gestion des Tâches Récurrentes (Génération automatique)
+    const { data: recurringMasters, error: recurringError } = await supabase
+      .from('tasks')
+      .select('*')
+      .not('recurrence', 'is', null)
+      .lte('next_generation_date', todayStr);
+      
+    if (recurringError) throw recurringError;
+
+    let recurringCount = 0;
+    for (const master of recurringMasters || []) {
+       // Création de l'instance pour la date prévue
+       const { error: insertError } = await supabase
+         .from('tasks')
+         .insert({
+           user_id: master.user_id,
+           group_id: master.group_id,
+           title: master.title,
+           category: master.category,
+           priority: master.priority,
+           due_date: master.next_generation_date,
+           due_time: master.due_time,
+           parent_task_id: master.id,
+           completed: false
+         });
+         
+       if (!insertError) {
+          // Calcul de la date SUIVANTE
+          const d = new Date(master.next_generation_date);
+          if (master.recurrence === 'daily') d.setDate(d.getDate() + 1);
+          else if (master.recurrence === 'weekly') d.setDate(d.getDate() + 7);
+          else if (master.recurrence === 'monthly') d.setMonth(d.getMonth() + 1);
+          
+          await supabase
+            .from('tasks')
+            .update({ next_generation_date: d.toISOString().split('T')[0] })
+            .eq('id', master.id);
+            
+          recurringCount++;
+       } else {
+          console.error(`Erreur génération tâche récurrente ${master.id}:`, insertError);
+       }
+    }
+
+    return NextResponse.json({ 
+      success: true, 
+      processedTasks: sentCount, 
+      evaluatedTasks: tasksToNotify.length,
+      generatedRecurringTasks: recurringCount
+    });
 
   } catch (error: any) {
     console.error('Erreur Critique CRON:', error);

@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Check, Trash2, LogOut, Star, Edit2 } from 'lucide-react';
+import { Briefcase, Check, Trash2, LogOut, Star, Edit2, Repeat } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getAllTasks, toggleTaskCompletion, deleteTask, type Task } from '@/lib/db';
 import { createClient } from '@/lib/supabase';
@@ -192,7 +192,35 @@ export default function Home() {
                       <span className="uppercase tracking-wider">{task.priority === 'high' ? 'URGENT' : task.priority}</span>
                       <span className="w-1 h-1 bg-gray-200 rounded-full" />
                       <span className="uppercase tracking-wider">{categories.find(c => c.id === task.category)?.name}</span>
+                      {task.recurrence && (
+                        <>
+                          <span className="w-1 h-1 bg-gray-200 rounded-full" />
+                          <Repeat size={12} className="text-indigo-500" />
+                          <span className="text-indigo-500 font-bold lowercase tracking-normal">
+                            {task.recurrence === 'daily' ? 'chaque jour' : task.recurrence === 'weekly' ? 'toutes les sem.' : 'chaque mois'}
+                          </span>
+                        </>
+                      )}
                     </p>
+                    
+                    {task.subtasks_total ? task.subtasks_total > 0 && (
+                      <div className="mt-3 space-y-1.5">
+                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                          <span className="flex items-center gap-1">
+                            <Check size={10} className="text-emerald-500" /> 
+                            {Math.round((task.subtasks_completed! / task.subtasks_total!) * 100)}%
+                          </span>
+                          <span>{task.subtasks_completed}/{task.subtasks_total} étapes</span>
+                        </div>
+                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                          <motion.div 
+                            initial={{ width: 0 }}
+                            animate={{ width: `${(task.subtasks_completed! / task.subtasks_total!) * 100}%` }}
+                            className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
+                          />
+                        </div>
+                      </div>
+                    ) : null}
                   </div>
                   <div className="flex items-center gap-2">
                     <button 

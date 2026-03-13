@@ -14,6 +14,11 @@ export interface Task {
   created_at?: string;
   completed: boolean;
   notification_sent?: boolean;
+  recurrence?: 'daily' | 'weekly' | 'monthly';
+  parent_task_id?: number | null;
+  next_generation_date?: string | null;
+  subtasks_total?: number;
+  subtasks_completed?: number;
 }
 
 export interface Group {
@@ -30,12 +35,31 @@ export interface GroupMember {
   created_at: string;
 }
 
+export interface SubTask {
+  id: string;
+  task_id: number;
+  title: string;
+  completed: boolean;
+  position: number;
+  created_at?: string;
+}
+
 
 const supabase = createClient();
 
 export async function addTask(task: Omit<Task, 'id' | 'created_at' | 'completed' | 'user_id'>) {
   const { data: { user } } = await supabase.auth.getUser();
   if (!user) return;
+
+  let nextGenDate: string | null = null;
+  if (task.recurrence) {
+    const baseDate = task.due_date || new Date().toISOString().split('T')[0];
+    const d = new Date(baseDate);
+    if (task.recurrence === 'daily') d.setDate(d.getDate() + 1);
+    else if (task.recurrence === 'weekly') d.setDate(d.getDate() + 7);
+    else if (task.recurrence === 'monthly') d.setMonth(d.getMonth() + 1);
+    nextGenDate = d.toISOString().split('T')[0];
+  }
   
   const { error } = await supabase
     .from('tasks')
@@ -43,6 +67,7 @@ export async function addTask(task: Omit<Task, 'id' | 'created_at' | 'completed'
       ...task,
       user_id: user.id,
       completed: false,
+      next_generation_date: nextGenDate
     });
   
   if (error) console.error('Error adding task:', error.message);
@@ -50,13 +75,15 @@ export async function addTask(task: Omit<Task, 'id' | 'created_at' | 'completed'
 
 export async function getAllTasks(): Promise<Task[]> {
   const { data, error } = await supabase
-    .from('tasks')
+    .from('task_with_stats')
     .select('*')
     .order('created_at', { ascending: false });
 
   if (error) {
-    console.error('Error fetching tasks:', error.message);
-    return [];
+    console.error('Error fetching tasks from view:', error.message);
+    // Fallback to table if view fails
+    const { data: fallbackData } = await supabase.from('tasks').select('*').order('created_at', { ascending: false });
+    return fallbackData || [];
   }
   return data || [];
 }
@@ -130,4 +157,44 @@ export async function getUserGroups(): Promise<Group[]> {
     return [];
   }
   return data || [];
+}
+
+export async function getSubTasks(taskId: number): Promise<SubTask[]> {
+  const { data, error } = await supabase
+    .from('subtasks')
+    .select('*')
+    .eq('task_id', taskId)
+    .order('position', { ascending: true });
+    
+  if (error) {
+    console.error('Error fetching subtasks:', error.message);
+    return [];
+  }
+  return data || [];
+}
+
+export async function addSubTask(taskId: number, title: string) {
+  const { error } = await supabase
+    .from('subtasks')
+    .insert({ task_id: taskId, title });
+    
+  if (error) console.error('Error adding subtask:', error.message);
+}
+
+export async function toggleSubTask(id: string, currentStatus: boolean) {
+  const { error } = await supabase
+    .from('subtasks')
+    .update({ completed: !currentStatus })
+    .eq('id', id);
+    
+  if (error) console.error('Error toggling subtask:', error.message);
+}
+
+export async function deleteSubTask(id: string) {
+  const { error } = await supabase
+    .from('subtasks')
+    .delete()
+    .eq('id', id);
+    
+  if (error) console.error('Error deleting subtask:', error.message);
 }
