@@ -1,9 +1,39 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 import { NextResponse } from "next/server";
+import { createServerSupabaseClient } from '@/lib/supabase-server';
+
+/**
+ * Assainit une chaîne de caractères pour éviter les injections simples ou les caractères de contrôle.
+ */
+function sanitizeInput(input: string): string {
+  if (typeof input !== 'string') return '';
+  // Supprime les balises HTML potentielles et les caractères de contrôle suspects
+  return input
+    .replace(/<[^>]*>?/gm, '')
+    .substring(0, 500); // Limite raisonnable pour un titre/message
+}
 
 export async function POST(req: Request) {
   try {
-    const { messages, tasks } = await req.json();
+    const supabase = createServerSupabaseClient();
+    const { data: { user } } = await supabase.auth.getUser();
+
+    if (!user) {
+      console.warn("Unauthorized AI attempt.");
+      return NextResponse.json({ error: "Authentification requise pour utiliser Zenia." }, { status: 401 });
+    }
+
+    const body = await req.json();
+    const messages = (body.messages || []).map((m: any) => ({
+      ...m,
+      content: sanitizeInput(m.content)
+    }));
+    
+    // On assainit aussi les titres des tâches passées en contexte
+    const tasks = (body.tasks || []).map((t: any) => ({
+      ...t,
+      title: sanitizeInput(t.title)
+    }));
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
     console.log("AI Request received. API Key presence:", !!apiKey);
     if (apiKey) {
