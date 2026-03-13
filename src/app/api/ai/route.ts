@@ -48,15 +48,13 @@ export async function POST(req: Request) {
       title: sanitizeInput(t.title)
     }));
     const apiKey = process.env.GOOGLE_GENERATIVE_AI_API_KEY;
-    console.log("AI Request received. API Key presence:", !!apiKey);
-    if (apiKey) {
-      console.log("API Key preview:", apiKey.substring(0, 8) + "...");
-    }
     
     if (!apiKey) {
-      console.error("GOOGLE_GENERATIVE_AI_API_KEY is missing!");
+      console.error("[ZENIA DEBUG] GOOGLE_GENERATIVE_AI_API_KEY is missing!");
       return NextResponse.json({ error: "Configuration IA manquante." }, { status: 500 });
     }
+
+    console.log("[ZENIA DEBUG] API Key OK (starts with:", apiKey.substring(0, 4) + ")");
 
     const genAI = new GoogleGenerativeAI(apiKey);
     
@@ -98,22 +96,30 @@ Instructions importantes :
     // Gemini requires the first message in history to be from 'user'
     // If our history starts with 'model', we remove it
     if (chatHistory.length > 0 && chatHistory[0].role === 'model') {
+      console.log("[ZENIA DEBUG] Shifting history to start with user message.");
       chatHistory.shift();
+    }
+
+    console.log("[ZENIA DEBUG] Chat History items:", chatHistory.length);
+    if (chatHistory.length > 0) {
+      console.log("[ZENIA DEBUG] First message role after shift:", chatHistory[0].role);
     }
 
     const chat = model.startChat({
       history: chatHistory,
       generationConfig: {
-        maxOutputTokens: 500,
+        maxOutputTokens: 800,
+        temperature: 0.7,
       },
     });
 
     const userMessage = messages[messages.length - 1].content;
+    console.log("[ZENIA DEBUG] Sending user message length:", userMessage.length);
     
-    console.log("Sending message to Zenia...");
     const result = await chat.sendMessage(userMessage);
     const response = await result.response;
     const text = response.text();
+    console.log("[ZENIA DEBUG] Success! Response length:", text.length);
     console.log("Gemini response received.");
 
     return NextResponse.json({ content: text });
