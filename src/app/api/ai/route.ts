@@ -76,7 +76,7 @@ ${sanitizedTasks.map(t => `- ${t.title} (${t.priority}, ${t.due_date || 'Sans da
       ...formattedMessages
     ];
 
-    console.log("[ZENIA DEBUG] Sending request to Xai API (grok-beta)...");
+    console.log("[ZENIA DEBUG] Sending request to Xai API (grok-3)...");
     
     const xaiResponse = await fetch("https://api.x.ai/v1/chat/completions", {
       method: "POST",
@@ -85,7 +85,7 @@ ${sanitizedTasks.map(t => `- ${t.title} (${t.priority}, ${t.due_date || 'Sans da
         "Authorization": `Bearer ${xaiApiKey}`
       },
       body: JSON.stringify({
-        model: "grok-beta", // Modèle confirmé actif dans EPI Manager
+        model: "grok-3", // Seul modèle confirmé fonctionnel via audit EPI Manager
         messages: chatMessages,
         temperature: 0.7,
         max_tokens: 800
