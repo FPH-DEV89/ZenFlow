@@ -12,7 +12,9 @@ export interface Task {
   due_time?: string;
   created_at?: string;
   completed: boolean;
+  notification_sent?: boolean;
 }
+
 
 const supabase = createClient();
 
