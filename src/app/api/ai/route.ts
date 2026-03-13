@@ -22,7 +22,7 @@ export async function POST(req: Request) {
     
     // Validation avec Zod
     const validatedData = AiRequestSchema.parse(body);
-    const { messages, tasks } = validatedData;
+    const { messages, tasks = [] } = validatedData;
 
     // Assainissement des tâches pour le contexte
     const sanitizedTasks = tasks.map((t: any) => ({
