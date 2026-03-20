@@ -1,6 +1,7 @@
 import { createAdminSupabaseClient } from '@/lib/supabase-admin';
 import { NextResponse } from 'next/server';
 import webpush from 'web-push';
+import { generateSmartSummary } from '@/lib/ai-cron';
 
 export async function GET(request: Request) {
   // 1. Vérification stricte du secret (Protection de la route)
@@ -154,9 +155,11 @@ export async function GET(request: Request) {
          const updates = {};
 
          if (needsMorning) {
+            const { data: mTasks } = await supabase.from('tasks').select('title, priority').eq('user_id', setting.user_id).eq('completed', false).eq('due_date', todayStr);
+            const bodyText = await generateSmartSummary(mTasks || [], 'morning');
             const payload = JSON.stringify({
                title: `🌅 Bonjour ! Voici votre programme`,
-               body: `Ouvrez ZenFlow pour voir ce qui vous attend aujourd'hui.`,
+               body: bodyText,
                url: '/'
             });
             pushPromises.push(webpush.sendNotification(subscription, payload).catch(e => console.error('Push Matin failed', e)));
@@ -165,9 +168,11 @@ export async function GET(request: Request) {
          }
 
          if (needsEvening) {
+            const { data: eTasks } = await supabase.from('tasks').select('title').eq('user_id', setting.user_id).eq('completed', true).eq('due_date', todayStr);
+            const bodyText = await generateSmartSummary(eTasks || [], 'evening');
             const payload = JSON.stringify({
                title: `🌇 Bilan de la journée`,
-               body: `Regardez ce que vous avez accompli et planifiez demain.`,
+               body: bodyText,
                url: '/'
             });
             pushPromises.push(webpush.sendNotification(subscription, payload).catch(e => console.error('Push Soir failed', e)));
