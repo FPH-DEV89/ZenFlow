@@ -122,7 +122,7 @@ export default function SubTaskList({ taskId, taskTitle, onProgressChange, compa
             )}
           >
             <button
-              onClick={() => handleToggle(st.id, st.completed)}
+              onClick={(e) => { e.stopPropagation(); handleToggle(st.id, st.completed); }}
               className={cn(
                 "w-6 h-6 rounded-lg border-2 flex items-center justify-center transition-all",
                 st.completed ? "bg-emerald-500 border-emerald-500" : "border-slate-200",
@@ -139,7 +139,7 @@ export default function SubTaskList({ taskId, taskTitle, onProgressChange, compa
               {st.title}
             </span>
             <button
-              onClick={() => handleDelete(st.id)}
+              onClick={(e) => { e.stopPropagation(); handleDelete(st.id); }}
               className={cn(
                 "opacity-0 group-hover:opacity-100 p-1.5 text-slate-300 hover:text-red-500 transition-all",
                 compact && "p-1"
@@ -151,7 +151,11 @@ export default function SubTaskList({ taskId, taskTitle, onProgressChange, compa
         ))}
       </AnimatePresence>
 
-      <form onSubmit={handleAdd} className={cn("relative mt-2", compact && "mt-1")}>
+      <form 
+        onSubmit={handleAdd} 
+        className={cn("relative mt-2", compact && "mt-1")}
+        onClick={(e) => e.stopPropagation()}
+      >
         <input
           type="text"
           value={newTitle}

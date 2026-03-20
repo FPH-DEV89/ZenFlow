@@ -185,11 +185,11 @@ export default function Home() {
   const router = useRouter();
   const supabase = createClient();
 
-  const fetchTasks = async () => {
-    setIsLoadingTasks(true);
+  const fetchTasks = async (silent = false) => {
+    if (!silent) setIsLoadingTasks(true);
     const data = await getAllTasks();
     setTasks(data);
-    setIsLoadingTasks(false);
+    if (!silent) setIsLoadingTasks(false);
   };
 
   useEffect(() => {
@@ -207,12 +207,12 @@ export default function Home() {
 
   const handleToggle = async (id: number, currentStatus: boolean) => {
     await toggleTaskCompletion(id, currentStatus);
-    fetchTasks();
+    fetchTasks(true);
   };
 
   const handleDelete = async (id: number) => {
     await deleteTask(id);
-    fetchTasks();
+    fetchTasks(true);
   };
 
   const handleLogout = async () => {
@@ -363,7 +363,7 @@ export default function Home() {
                   onToggle={handleToggle}
                   onDelete={handleDelete}
                   onEdit={(id: number) => router.push(`/edit-task/${id}`)}
-                  onRefresh={() => fetchTasks()}
+                  onRefresh={() => fetchTasks(true)}
                 />
               ))
             ) : (
