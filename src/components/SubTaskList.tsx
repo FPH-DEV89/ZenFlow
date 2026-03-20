@@ -1,20 +1,22 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Plus, Check, Trash2, GripVertical } from 'lucide-react';
+import { Plus, Check, Trash2, GripVertical, Sparkles, Loader2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { cn } from '@/lib/utils';
 import { getSubTasks, addSubTask, toggleSubTask, deleteSubTask, type SubTask } from '@/lib/db';
 
 interface SubTaskListProps {
   taskId: number;
+  taskTitle?: string;
   onProgressChange?: (progress: number) => void;
 }
 
-export default function SubTaskList({ taskId, onProgressChange }: SubTaskListProps) {
+export default function SubTaskList({ taskId, taskTitle, onProgressChange }: SubTaskListProps) {
   const [subtasks, setSubtasks] = useState<SubTask[]>([]);
   const [newTitle, setNewTitle] = useState('');
   const [isLoading, setIsLoading] = useState(true);
+  const [isGeneratingSubtasks, setIsGeneratingSubtasks] = useState(false);
 
   const fetchSubTasks = async () => {
     const data = await getSubTasks(taskId);
@@ -52,11 +54,56 @@ export default function SubTaskList({ taskId, onProgressChange }: SubTaskListPro
 
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between mb-2">
-        <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Sous-tâches</h4>
-        <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
-          {subtasks.filter(s => s.completed).length}/{subtasks.length}
-        </span>
+      <div className="flex items-center justify-between mb-4">
+        <div className="flex items-center gap-2">
+          <h4 className="text-sm font-bold text-slate-400 uppercase tracking-widest">Sous-tâches</h4>
+          <span className="text-[10px] font-bold bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">
+            {subtasks.filter(s => s.completed).length}/{subtasks.length}
+          </span>
+        </div>
+        
+        {taskTitle && (
+          <button
+            type="button"
+            onClick={async () => {
+              if (isGeneratingSubtasks) return;
+              setIsGeneratingSubtasks(true);
+              try {
+                const res = await fetch('/api/ai/subtasks', {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ title: taskTitle })
+                });
+                if (res.ok) {
+                  const data = await res.json();
+                  if (data.subtasks && Array.isArray(data.subtasks)) {
+                    // Save each generated subtask to DB
+                    for (const title of data.subtasks) {
+                      await addSubTask(taskId, title);
+                    }
+                    fetchSubTasks();
+                  }
+                }
+              } catch (e) {
+                console.error('Failed to generate subtasks:', e);
+              } finally {
+                setIsGeneratingSubtasks(false);
+              }
+            }}
+            disabled={isGeneratingSubtasks}
+            className={cn(
+               "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all shadow-sm",
+               "bg-gradient-to-r from-purple-500 to-[#f425f4] text-white hover:opacity-90 active:scale-95"
+            )}
+          >
+            {isGeneratingSubtasks ? (
+              <Loader2 size={14} className="animate-spin" />
+            ) : (
+              <Sparkles size={14} />
+            )}
+            {isGeneratingSubtasks ? "Découpage..." : "Magie IA"}
+          </button>
+        )}
       </div>
 
       <AnimatePresence initial={false}>

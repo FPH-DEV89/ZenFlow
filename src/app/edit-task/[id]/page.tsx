@@ -229,7 +229,7 @@ export default function EditTask() {
           </div>
 
           <div className="mt-8">
-            <SubTaskList taskId={taskId} />
+            <SubTaskList taskId={taskId} taskTitle={taskName} />
           </div>
 
           <motion.button

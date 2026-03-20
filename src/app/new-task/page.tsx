@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Calendar, Clock, Flag, Hash, Plus, Trash2, CheckCircle2, Bell } from 'lucide-react';
+import { X, Send, Calendar, Clock, Flag, Hash, Plus, Trash2, CheckCircle2, Bell, Sparkles, Loader2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { addTask, getUserGroups, Group } from '@/lib/db';
@@ -28,6 +28,7 @@ export default function NewTask() {
   const [recurrence, setRecurrence] = useState<Recurrence>('none');
   const [subtasks, setSubtasks] = useState<string[]>([]);
   const [newSubtaskTitle, setNewSubtaskTitle] = useState('');
+  const [isGeneratingSubtasks, setIsGeneratingSubtasks] = useState(false);
 
   // Auto-focus on load for zero friction
   useEffect(() => {
@@ -271,9 +272,50 @@ export default function NewTask() {
 
             {/* Subtasks Section */}
             <div className="col-span-2 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-4">
-              <div className="flex items-center gap-2 text-slate-400">
-                <CheckCircle2 size={16} />
-                <span className="text-xs font-semibold uppercase tracking-wider">Sous-tâches ({subtasks.length})</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2 text-slate-400">
+                  <CheckCircle2 size={16} />
+                  <span className="text-xs font-semibold uppercase tracking-wider">Sous-tâches ({subtasks.length})</span>
+                </div>
+                
+                <button
+                  type="button"
+                  onClick={async () => {
+                    if (!taskName.trim() || isGeneratingSubtasks) return;
+                    setIsGeneratingSubtasks(true);
+                    try {
+                      const res = await fetch('/api/ai/subtasks', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ title: taskName })
+                      });
+                      if (res.ok) {
+                        const data = await res.json();
+                        if (data.subtasks && Array.isArray(data.subtasks)) {
+                          setSubtasks(prev => [...prev, ...data.subtasks]);
+                        }
+                      }
+                    } catch (e) {
+                      console.error('Failed to generate subtasks:', e);
+                    } finally {
+                      setIsGeneratingSubtasks(false);
+                    }
+                  }}
+                  disabled={!taskName.trim() || isGeneratingSubtasks}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all shadow-sm",
+                    !taskName.trim()
+                      ? "bg-slate-100 text-slate-400 cursor-not-allowed"
+                      : "bg-gradient-to-r from-purple-500 to-[#f425f4] text-white hover:opacity-90 active:scale-95"
+                  )}
+                >
+                  {isGeneratingSubtasks ? (
+                    <Loader2 size={14} className="animate-spin" />
+                  ) : (
+                    <Sparkles size={14} />
+                  )}
+                  {isGeneratingSubtasks ? "Découpage..." : "Magie IA"}
+                </button>
               </div>
               
               <div className="space-y-2">
