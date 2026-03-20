@@ -142,17 +142,6 @@ export default function Settings() {
               </label>
             </div>
             
-            <div className="p-4 bg-purple-50/20 border-b border-slate-50">
-              <button 
-                onClick={async () => {
-                  const res = await fetch('/api/push/send', { method: 'POST' });
-                  if (!res.ok) alert('Activez les notifications pour tester.');
-                }}
-                className="w-full py-3.5 bg-white border-2 border-purple-100 rounded-2xl text-[10px] font-black tracking-widest text-[#f425f4] hover:bg-white hover:shadow-lg active:scale-95 transition-all"
-              >
-                ENVOYER UN TEST
-              </button>
-            </div>
 
             <div className="flex items-center justify-between p-5 border-b border-slate-50">
               <div className="flex items-center gap-4">

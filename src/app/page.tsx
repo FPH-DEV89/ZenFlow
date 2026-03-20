@@ -57,7 +57,7 @@ function SwipeableTaskCard({
         dragConstraints={{ left: 0, right: 0 }}
         dragElastic={0.4}
         onDragEnd={handleDragEnd}
-        animate={swiped === 'right' ? { x: 400, opacity: 0 } : swiped === 'left' ? { x: -400, opacity: 0 } : { x: 0 }}
+        animate={swiped === 'right' ? { x: 400, opacity: 0 } : swiped === 'left' ? { x: -400, opacity: 0 } : { x: 0, opacity: 1, scale: 1 }}
         transition={{ type: 'spring', damping: 20 }}
         layout
         initial={{ opacity: 0, scale: 0.95 }}
