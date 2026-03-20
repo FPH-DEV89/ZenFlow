@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Send, Calendar, Clock, Flag, Hash, Plus, Trash2, CheckCircle2 } from 'lucide-react';
+import { X, Send, Calendar, Clock, Flag, Hash, Plus, Trash2, CheckCircle2, Bell } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 import { addTask, getUserGroups, Group } from '@/lib/db';
@@ -21,6 +21,7 @@ export default function NewTask() {
   const [category, setCategory] = useState<Category>('personal');
   const [dueDate, setDueDate] = useState('');
   const [dueTime, setDueTime] = useState('');
+  const [reminderOffset, setReminderOffset] = useState<number>(15);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [userGroups, setUserGroups] = useState<Group[]>([]);
   const [groupId, setGroupId] = useState<string | undefined>(undefined);
@@ -59,6 +60,7 @@ export default function NewTask() {
         due_time: dueTime || undefined,
         group_id: category === 'shared' ? groupId : undefined,
         recurrence: recurrence === 'none' ? undefined : recurrence,
+        reminder_offset: reminderOffset,
       }, subtasks);
       // Redirect back home on success
       router.push('/');
@@ -182,7 +184,7 @@ export default function NewTask() {
                  <Calendar size={18} />
                </div>
                <div className="flex-1 w-full relative">
-                 <p className="text-xs text-slate-400 font-medium">Date</p>
+                 <p className="text-xs text-slate-400 font-medium whitespace-nowrap overflow-hidden text-ellipsis">Date cible</p>
                  <input 
                    type="date"
                    value={dueDate}
@@ -200,7 +202,7 @@ export default function NewTask() {
                  <Clock size={18} />
                </div>
                <div className="flex-1 w-full relative">
-                 <p className="text-xs text-slate-400 font-medium">Heure</p>
+                 <p className="text-xs text-slate-400 font-medium">Heure cible</p>
                  <input 
                    type="time"
                    value={dueTime}
@@ -211,6 +213,35 @@ export default function NewTask() {
                    {dueTime || 'Sélectionner'}
                  </div>
                </div>
+            </div>
+
+            {/* Reminder Selector */}
+            <div className="col-span-2 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 flex flex-col gap-3">
+              <div className="flex items-center gap-2 text-slate-400">
+                <Bell size={16} />
+                <span className="text-xs font-semibold uppercase tracking-wider">Rappel</span>
+              </div>
+              <div className="flex gap-2">
+                {[
+                  { value: 0, label: "À l'heure" },
+                  { value: 15, label: "15 min avant" },
+                  { value: 60, label: "1h avant" }
+                ].map((r) => (
+                  <button
+                    key={r.value}
+                    type="button"
+                    onClick={() => setReminderOffset(r.value)}
+                    className={cn(
+                      "flex-1 py-2 rounded-xl text-xs font-bold transition-all duration-200 border",
+                      reminderOffset === r.value 
+                        ? "bg-amber-100 text-amber-600 border-amber-200 ring-2 ring-amber-200"
+                        : "bg-slate-50 text-slate-400 border-slate-100 hover:bg-slate-100"
+                    )}
+                  >
+                    {r.label}
+                  </button>
+                ))}
+              </div>
             </div>
 
             {/* Recurrence Selector */}

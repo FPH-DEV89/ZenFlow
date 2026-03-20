@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, BellRing, Bell, Volume2, Vibrate, Clock, Sun, Moon, UserPlus, CheckSquare, MessageSquare, ChevronRight, Edit2 } from 'lucide-react';
 import Link from 'next/link';
 import BottomNav from '@/components/BottomNav';
+import { getUserSettings, updateUserSettings } from '@/lib/db';
 
 export default function Settings() {
   const [mounted, setMounted] = useState(false);
@@ -23,17 +24,42 @@ export default function Settings() {
 
   const [showReminderPicker, setShowReminderPicker] = useState(false);
 
-  // Load settings from localStorage
+  // Load settings from DB and fallback to localStorage
   useEffect(() => {
-    setMounted(true);
-    const savedSettings = localStorage.getItem('zenflow_settings');
-    if (savedSettings) {
-      try {
-        setSettings(prev => ({ ...prev, ...JSON.parse(savedSettings) }));
-      } catch (e) {
-        console.error('Failed to parse saved settings', e);
+    const loadSettings = async () => {
+      // Local fallbacks
+      const savedSettings = localStorage.getItem('zenflow_settings');
+      let localState = {};
+      if (savedSettings) {
+        try {
+          localState = JSON.parse(savedSettings);
+        } catch (e) {
+          console.error('Failed to parse saved settings', e);
+        }
       }
-    }
+      
+      try {
+        const dbSettings = await getUserSettings();
+        setSettings(prev => ({ 
+          ...prev, 
+          ...localState,
+          pushEnabled: dbSettings.push_enabled,
+          sounds: dbSettings.sounds,
+          defaultReminder: dbSettings.default_reminder,
+          morningSummaryEnabled: dbSettings.morning_summary_enabled,
+          morningSummaryTime: dbSettings.morning_summary_time,
+          eveningSummaryEnabled: dbSettings.evening_summary_enabled,
+          eveningSummaryTime: dbSettings.evening_summary_time,
+        }));
+      } catch (e) {
+        console.error('No DB settings found or offline', e);
+        setSettings(prev => ({ ...prev, ...localState }));
+      } finally {
+        setMounted(true);
+      }
+    };
+    
+    loadSettings();
   }, []);
 
   // Save settings to localStorage
@@ -43,8 +69,21 @@ export default function Settings() {
     }
   }, [settings, mounted]);
 
-  const updateSetting = (key: keyof typeof settings, value: any) => {
+  const updateSetting = async (key: keyof typeof settings, value: any) => {
     setSettings(prev => ({ ...prev, [key]: value }));
+    const dbKeyMap: Record<string, string> = {
+      pushEnabled: 'push_enabled',
+      sounds: 'sounds',
+      defaultReminder: 'default_reminder',
+      morningSummaryEnabled: 'morning_summary_enabled',
+      morningSummaryTime: 'morning_summary_time',
+      eveningSummaryEnabled: 'evening_summary_enabled',
+      eveningSummaryTime: 'evening_summary_time',
+    };
+    
+    if (dbKeyMap[key as string]) {
+      await updateUserSettings({ [dbKeyMap[key as string]]: value });
+    }
   };
 
   if (!mounted) return null;

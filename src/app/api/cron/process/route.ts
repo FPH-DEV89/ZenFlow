@@ -59,11 +59,14 @@ export async function GET(request: Request) {
           const [taskH, taskM] = task.due_time.split(':').map(Number);
           const taskInMins = taskH * 60 + taskM;
           
-          // Différence en minutes par rapport à l'heure de Paris
-          const diffMins = taskInMins - nowInMins;
+          const offset = task.reminder_offset ?? 15;
+          const targetMins = taskInMins - offset;
           
-          // Si la tâche arrive dans <= 16 minutes, ou est en retard depuis moins de 60 minutes
-          if (diffMins <= 16 && diffMins >= -60) {
+          // Différence en minutes par rapport à l'heure de Paris
+          const diffMins = targetMins - nowInMins;
+          
+          // Si on est dans la fenêtre (-15 à +15 mins du moment de rappel)
+          if (diffMins <= 15 && diffMins >= -15) {
              tasksToNotify.push(task);
           }
        }
@@ -111,6 +114,71 @@ export async function GET(request: Request) {
              }
            }
         }
+      }
+    }
+
+    // 6.5. Rapports Quotidiens (Matin / Soir)
+    let reportsCount = 0;
+    const { data: settingsData } = await supabase.from('user_settings').select('*');
+    
+    if (settingsData && settingsData.length > 0) {
+      // Récupération des souscriptions de tous les utilisateurs
+      const { data: allSubs } = await supabase.from('push_subscriptions').select('*');
+      const allSubMap = new Map();
+      allSubs?.forEach(s => allSubMap.set(s.user_id, s.subscription));
+
+      for (const setting of settingsData) {
+         const subscription = allSubMap.get(setting.user_id);
+         if (!subscription) continue;
+
+         let needsMorning = false;
+         let needsEvening = false;
+
+         // Résumé Matin
+         if (setting.morning_summary_enabled && setting.last_morning_summary_date !== todayStr) {
+            const [mH, mM] = (setting.morning_summary_time || '08:00').split(':').map(Number);
+            if (nowInMins >= (mH * 60 + mM)) {
+              needsMorning = true;
+            }
+         }
+
+         // Bilan Soir
+         if (setting.evening_summary_enabled && setting.last_evening_summary_date !== todayStr) {
+            const [eH, eM] = (setting.evening_summary_time || '21:00').split(':').map(Number);
+            if (nowInMins >= (eH * 60 + eM)) {
+              needsEvening = true;
+            }
+         }
+
+         const pushPromises = [];
+         const updates = {};
+
+         if (needsMorning) {
+            const payload = JSON.stringify({
+               title: `🌅 Bonjour ! Voici votre programme`,
+               body: `Ouvrez ZenFlow pour voir ce qui vous attend aujourd'hui.`,
+               url: '/'
+            });
+            pushPromises.push(webpush.sendNotification(subscription, payload).catch(e => console.error('Push Matin failed', e)));
+            Object.assign(updates, { last_morning_summary_date: todayStr });
+            reportsCount++;
+         }
+
+         if (needsEvening) {
+            const payload = JSON.stringify({
+               title: `🌇 Bilan de la journée`,
+               body: `Regardez ce que vous avez accompli et planifiez demain.`,
+               url: '/'
+            });
+            pushPromises.push(webpush.sendNotification(subscription, payload).catch(e => console.error('Push Soir failed', e)));
+            Object.assign(updates, { last_evening_summary_date: todayStr });
+            reportsCount++;
+         }
+
+         if (pushPromises.length > 0) {
+            await Promise.all(pushPromises);
+            await supabase.from('user_settings').update(updates).eq('user_id', setting.user_id);
+         }
       }
     }
 
@@ -162,7 +230,8 @@ export async function GET(request: Request) {
       success: true, 
       processedTasks: sentCount, 
       evaluatedTasks: tasksToNotify.length,
-      generatedRecurringTasks: recurringCount
+      generatedRecurringTasks: recurringCount,
+      dailyReportsSent: reportsCount
     });
 
   } catch (error: any) {

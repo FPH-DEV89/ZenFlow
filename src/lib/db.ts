@@ -19,6 +19,18 @@ export interface Task {
   next_generation_date?: string | null;
   subtasks_total?: number;
   subtasks_completed?: number;
+  reminder_offset?: number;
+}
+
+export interface UserSettings {
+  user_id: string;
+  morning_summary_enabled: boolean;
+  morning_summary_time: string;
+  evening_summary_enabled: boolean;
+  evening_summary_time: string;
+  default_reminder: number;
+  push_enabled: boolean;
+  sounds: boolean;
 }
 
 export interface Group {
@@ -220,4 +232,41 @@ export async function deleteSubTask(id: string) {
     .eq('id', id);
     
   if (error) console.error('Error deleting subtask:', error.message);
+}
+
+export async function getUserSettings(): Promise<UserSettings> {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) throw new Error("No user found");
+  
+  const { data, error } = await supabase
+    .from('user_settings')
+    .select('*')
+    .eq('user_id', user.id)
+    .single();
+    
+  if (error && error.code !== 'PGRST116') {
+    console.error('Error fetching user settings:', error.message);
+  }
+  
+  return data || {
+    user_id: user.id,
+    morning_summary_enabled: true,
+    morning_summary_time: '08:00',
+    evening_summary_enabled: false,
+    evening_summary_time: '21:00',
+    default_reminder: 15,
+    push_enabled: false,
+    sounds: true
+  };
+}
+
+export async function updateUserSettings(settings: Partial<UserSettings>) {
+  const { data: { user } } = await supabase.auth.getUser();
+  if (!user) return;
+  
+  const { error } = await supabase
+    .from('user_settings')
+    .upsert({ ...settings, user_id: user.id });
+    
+  if (error) console.error('Error updating settings:', error.message);
 }
