@@ -20,12 +20,12 @@ export async function generateSmartSummary(tasks: Partial<Task>[], type: 'mornin
   if (type === 'morning') {
     instructions = `Tu es Zenia, une assistante IA zen. C'est le matin. Voici les tâches prévues aujourd'hui. Rédige une très courte notification (max 110 caractères) pour souhaiter une bonne journée et motiver l'utilisateur. Tu peux mentionner une tâche clé. Reste naturel et ultra-concis. Signe avec "🌸 Zenia".`;
     tasksContext = tasks.length > 0 
-      ? tasks.map(t => `- ${t.title} (${t.priority || 'medium'})`).join('\\n')
+      ? tasks.map(t => `- ${t.title} (${t.priority || 'medium'})`).join('\n')
       : "Aucune tâche prévue aujourd'hui. Suggère de se reposer ou d'en ajouter une.";
   } else {
     instructions = `Tu es Zenia, une assistante IA zen. C'est le soir. Voici les tâches accomplies aujourd'hui. Rédige une très courte notification (max 110 caractères) pour féliciter l'utilisateur de ses accomplissements. Si aucune, encourage pour demain. Reste très concis. Signe avec "🌸 Zenia".`;
     tasksContext = tasks.length > 0 
-      ? tasks.map(t => `- ${t.title}`).join('\\n')
+      ? tasks.map(t => `- ${t.title}`).join('\n')
       : "Aucune tâche complétée aujourd'hui.";
   }
 
