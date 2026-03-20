@@ -93,7 +93,7 @@ export default function SubTaskList({ taskId, taskTitle, onProgressChange }: Sub
             disabled={isGeneratingSubtasks}
             className={cn(
                "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all shadow-sm",
-               "bg-gradient-to-r from-purple-500 to-[#f425f4] text-white hover:opacity-90 active:scale-95"
+               "bg-gradient-to-r from-purple-500 to-[var(--theme-primary)] text-white hover:opacity-90 active:scale-95"
             )}
           >
             {isGeneratingSubtasks ? (

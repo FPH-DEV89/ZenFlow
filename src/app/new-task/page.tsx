@@ -306,7 +306,7 @@ export default function NewTask() {
                     "flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-[10px] font-bold uppercase transition-all shadow-sm",
                     !taskName.trim()
                       ? "bg-slate-100 text-slate-400 cursor-not-allowed"
-                      : "bg-gradient-to-r from-purple-500 to-[#f425f4] text-white hover:opacity-90 active:scale-95"
+                      : "bg-gradient-to-r from-purple-500 to-[var(--theme-primary)] text-white hover:opacity-90 active:scale-95"
                   )}
                 >
                   {isGeneratingSubtasks ? (
@@ -356,7 +356,7 @@ export default function NewTask() {
                     }
                   }}
                   placeholder="Ajouter une étape..."
-                  className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-[#f425f4]/20 transition-all"
+                  className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-[var(--theme-primary)]/20 transition-all"
                 />
                 <button
                   type="button"
@@ -366,7 +366,7 @@ export default function NewTask() {
                       setNewSubtaskTitle('');
                     }
                   }}
-                  className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-[#f425f4] hover:text-white transition-all"
+                  className="w-10 h-10 rounded-xl bg-slate-100 flex items-center justify-center text-slate-500 hover:bg-[var(--theme-primary)] hover:text-white transition-all"
                 >
                   <Plus size={20} />
                 </button>
@@ -383,7 +383,7 @@ export default function NewTask() {
             className={cn(
                "mt-8 w-full h-14 rounded-2xl flex items-center justify-center gap-2 font-bold text-white shadow-lg transition-all",
                taskName.trim() && !isSubmitting
-                 ? "bg-[#f425f4] shadow-[#f425f4]/30" 
+                 ? "bg-[var(--theme-primary)] shadow-[var(--theme-primary)]/30" 
                  : "bg-slate-300 shadow-none"
              )}
           >

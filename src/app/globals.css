@@ -2,4 +2,40 @@
 @tailwind components;
 @tailwind utilities;
 
-/* Additional utility classes can be added here if needed in the future */
+/* ─── ZenFlow Theme System ──────────────────────────────────────── */
+:root,
+[data-theme="fuchsia"] {
+  --theme-primary: #f425f4;
+  --theme-primary-dark: #d820d8;
+  --theme-primary-rgb: 244, 37, 244;
+}
+
+[data-theme="indigo"] {
+  --theme-primary: #6366f1;
+  --theme-primary-dark: #4f46e5;
+  --theme-primary-rgb: 99, 102, 241;
+}
+
+[data-theme="emerald"] {
+  --theme-primary: #10b981;
+  --theme-primary-dark: #059669;
+  --theme-primary-rgb: 16, 185, 129;
+}
+
+[data-theme="orange"] {
+  --theme-primary: #f97316;
+  --theme-primary-dark: #ea580c;
+  --theme-primary-rgb: 249, 115, 22;
+}
+
+[data-theme="cyan"] {
+  --theme-primary: #06b6d4;
+  --theme-primary-dark: #0891b2;
+  --theme-primary-rgb: 6, 182, 212;
+}
+
+[data-theme="rose"] {
+  --theme-primary: #f43f5e;
+  --theme-primary-dark: #e11d48;
+  --theme-primary-rgb: 244, 63, 94;
+}

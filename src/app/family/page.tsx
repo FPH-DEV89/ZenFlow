@@ -74,11 +74,11 @@ export default function FamilyPage() {
 
   return (
     <>
-      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl px-4 py-6 flex items-center justify-between border-b border-[#f425f4]/5">
-        <Link href="/settings" className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 hover:bg-[#f425f4]/10 transition-all active:scale-90">
+      <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-xl px-4 py-6 flex items-center justify-between border-b border-[var(--theme-primary)]/5">
+        <Link href="/settings" className="w-10 h-10 flex items-center justify-center rounded-full bg-slate-50 hover:bg-[var(--theme-primary)]/10 transition-all active:scale-90">
           <ArrowLeft size={24} className="text-slate-900" />
         </Link>
-        <h1 className="text-xl font-black tracking-tight text-center flex-1 bg-gradient-to-r from-slate-900 to-[#f425f4] bg-clip-text text-transparent italic">Mon Foyer</h1>
+        <h1 className="text-xl font-black tracking-tight text-center flex-1 bg-gradient-to-r from-slate-900 to-[var(--theme-primary)] bg-clip-text text-transparent italic">Mon Foyer</h1>
         <div className="w-10 h-10"></div>
       </header>
 
@@ -86,12 +86,12 @@ export default function FamilyPage() {
         
         {isLoading ? (
           <div className="flex justify-center py-20">
-            <div className="w-8 h-8 rounded-full border-4 border-[#f425f4]/30 border-t-[#f425f4] animate-spin"></div>
+            <div className="w-8 h-8 rounded-full border-4 border-[var(--theme-primary)]/30 border-t-[var(--theme-primary)] animate-spin"></div>
           </div>
         ) : groups.length === 0 ? (
-          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-[#f425f4]/5 text-center max-w-sm mx-auto mt-4">
-            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[#f425f4]/10 to-purple-100 rounded-full flex items-center justify-center mb-6">
-              <HomeIcon size={40} className="text-[#f425f4]" />
+          <div className="bg-white rounded-[2rem] p-8 shadow-sm border border-[var(--theme-primary)]/5 text-center max-w-sm mx-auto mt-4">
+            <div className="w-20 h-20 mx-auto bg-gradient-to-br from-[var(--theme-primary)]/10 to-purple-100 rounded-full flex items-center justify-center mb-6">
+              <HomeIcon size={40} className="text-[var(--theme-primary)]" />
             </div>
             <h2 className="text-2xl font-black text-slate-900 mb-2">Créer un Foyer</h2>
             <p className="text-slate-500 text-sm mb-8">Partagez vos tâches avec votre famille ou vos colocataires pour réduire la charge mentale à plusieurs.</p>
@@ -102,13 +102,13 @@ export default function FamilyPage() {
                 placeholder="Nom du foyer (ex: Maison 🏡)"
                 value={groupName}
                 onChange={(e) => setGroupName(e.target.value)}
-                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-base font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[#f425f4]/50 focus:bg-white transition-all text-center"
+                className="w-full bg-slate-50 border-2 border-slate-100 rounded-2xl px-5 py-4 text-base font-bold text-slate-800 placeholder-slate-400 focus:outline-none focus:border-[var(--theme-primary)]/50 focus:bg-white transition-all text-center"
                 required
               />
               <button 
                 type="submit" 
                 disabled={isCreating || !groupName.trim()}
-                className="w-full bg-[#f425f4] text-white font-black text-sm tracking-widest uppercase rounded-2xl py-4 flex items-center justify-center gap-2 hover:bg-[#d820d8] active:scale-95 transition-all shadow-xl shadow-[#f425f4]/30 disabled:opacity-50 disabled:active:scale-100"
+                className="w-full bg-[var(--theme-primary)] text-white font-black text-sm tracking-widest uppercase rounded-2xl py-4 flex items-center justify-center gap-2 hover:bg-[#d820d8] active:scale-95 transition-all shadow-xl shadow-[var(--theme-primary)]/30 disabled:opacity-50 disabled:active:scale-100"
               >
                 {isCreating ? 'Création...' : (
                   <>
@@ -121,7 +121,7 @@ export default function FamilyPage() {
         ) : (
           <div className="space-y-6">
             {/* Group details (taking the first group as primary) */}
-            <div className="bg-gradient-to-br from-[#f425f4] to-purple-600 rounded-[2rem] p-6 text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
+            <div className="bg-gradient-to-br from-[var(--theme-primary)] to-purple-600 rounded-[2rem] p-6 text-white shadow-xl shadow-purple-500/20 relative overflow-hidden">
                <div className="absolute -right-10 -top-10 opacity-10">
                  <Users size={150} />
                </div>
@@ -145,7 +145,7 @@ export default function FamilyPage() {
 
                   <button 
                     onClick={() => copyMagicLink(groups[0].id)}
-                    className="w-full bg-white text-[#f425f4] font-black text-sm tracking-widest uppercase rounded-2xl py-4 flex items-center justify-center gap-2 hover:bg-slate-50 active:scale-95 transition-all shadow-lg shadow-black/10"
+                    className="w-full bg-white text-[var(--theme-primary)] font-black text-sm tracking-widest uppercase rounded-2xl py-4 flex items-center justify-center gap-2 hover:bg-slate-50 active:scale-95 transition-all shadow-lg shadow-black/10"
                   >
                     {copiedLink ? (
                        <>COPIÉ <CheckCircle2 size={18} /></>
@@ -158,7 +158,7 @@ export default function FamilyPage() {
             </div>
             
             <div className="bg-white rounded-[2rem] p-6 border border-slate-100 shadow-sm">
-               <h3 className="text-[#f425f4] font-black text-[10px] uppercase tracking-[0.2em] mb-4 opacity-50">Information</h3>
+               <h3 className="text-[var(--theme-primary)] font-black text-[10px] uppercase tracking-[0.2em] mb-4 opacity-50">Information</h3>
                <p className="text-sm font-medium text-slate-600 leading-relaxed">
                   Désormais, lors de la création d'une tâche, vous pourrez choisir de la laisser **Personnelle** ou de l'attribuer au foyer **{groups[0].name}**.
                </p>

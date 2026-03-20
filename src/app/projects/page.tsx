@@ -20,8 +20,8 @@ export default function Projects() {
   const sharedTasks = useMemo(() => tasks.filter(t => t.category === 'shared'), [tasks]);
 
   const projectCards = [
-    { name: 'Travail', tasks: workTasks, img: 'work', gradient: 'from-purple-400/20 to-[#f425f4]/20', color: 'text-purple-600' },
-    { name: 'Personnel', tasks: personalTasks, img: 'personal', gradient: 'from-[#f425f4]/20 to-pink-400/20', color: 'text-pink-600' },
+    { name: 'Travail', tasks: workTasks, img: 'work', gradient: 'from-purple-400/20 to-[var(--theme-primary)]/20', color: 'text-purple-600' },
+    { name: 'Personnel', tasks: personalTasks, img: 'personal', gradient: 'from-[var(--theme-primary)]/20 to-pink-400/20', color: 'text-pink-600' },
     { name: 'Partagé', tasks: sharedTasks, img: 'shared', gradient: 'from-teal-400/20 to-blue-400/20', color: 'text-teal-600' },
   ];
 
@@ -29,12 +29,12 @@ export default function Projects() {
     <>
       <header className="flex items-center justify-between p-6 pb-4">
         <div className="flex items-center gap-3">
-          <div className="bg-[#f425f4]/10 p-2 rounded">
-            <FolderOpen size={24} className="text-[#f425f4]" />
+          <div className="bg-[var(--theme-primary)]/10 p-2 rounded">
+            <FolderOpen size={24} className="text-[var(--theme-primary)]" />
           </div>
           <h1 className="text-2xl font-bold tracking-tight">Projets</h1>
         </div>
-        <button className="bg-[#f425f4] text-white p-2 rounded-full shadow-lg shadow-[#f425f4]/20 flex items-center justify-center">
+        <button className="bg-[var(--theme-primary)] text-white p-2 rounded-full shadow-lg shadow-[var(--theme-primary)]/20 flex items-center justify-center">
           <UserPlus size={20} />
         </button>
       </header>
@@ -51,7 +51,7 @@ export default function Projects() {
                 <Image src={`https://picsum.photos/seed/${proj.img}/300/300`} alt={proj.name} fill className="object-cover group-hover:scale-105 transition-transform duration-300" referrerPolicy="no-referrer" />
                 {proj.tasks.length > 0 && (
                   <div className="absolute top-2 right-2 bg-white/90 backdrop-blur-sm rounded-full px-2 py-0.5">
-                    <span className="text-[10px] font-bold text-[#f425f4] uppercase">{proj.tasks.filter(t => !t.completed).length} actif{proj.tasks.filter(t => !t.completed).length > 1 ? 's' : ''}</span>
+                    <span className="text-[10px] font-bold text-[var(--theme-primary)] uppercase">{proj.tasks.filter(t => !t.completed).length} actif{proj.tasks.filter(t => !t.completed).length > 1 ? 's' : ''}</span>
                   </div>
                 )}
               </div>
@@ -73,11 +73,11 @@ export default function Projects() {
           )}
 
           {tasks.filter(t => !t.completed).map((task) => (
-            <div key={task.id} className="bg-white p-4 rounded-lg flex items-center gap-4 border border-[#f425f4]/5 shadow-sm">
+            <div key={task.id} className="bg-white p-4 rounded-lg flex items-center gap-4 border border-[var(--theme-primary)]/5 shadow-sm">
               <div className={`p-2 rounded-full ${
                 task.category === 'work' ? 'bg-purple-100 text-purple-600' : 
                 task.category === 'shared' ? 'bg-teal-100 text-teal-600' : 
-                'bg-[#f425f4]/10 text-[#f425f4]'
+                'bg-[var(--theme-primary)]/10 text-[var(--theme-primary)]'
               }`}>
                 {task.category === 'work' ? <Briefcase size={20} /> : 
                  task.category === 'shared' ? <Users size={20} /> : <Heart size={20} />}
@@ -97,7 +97,7 @@ export default function Projects() {
           ))}
 
           {tasks.filter(t => t.completed).map((task) => (
-            <div key={task.id} className="bg-white p-4 rounded-lg flex items-center gap-4 border border-[#f425f4]/5 shadow-sm opacity-60">
+            <div key={task.id} className="bg-white p-4 rounded-lg flex items-center gap-4 border border-[var(--theme-primary)]/5 shadow-sm opacity-60">
               <div className="bg-slate-100 text-slate-500 p-2 rounded-full">
                 <CheckCircle2 size={20} />
               </div>
@@ -112,10 +112,10 @@ export default function Projects() {
           ))}
         </div>
 
-        <div className="mt-8 bg-gradient-to-r from-[#f425f4] to-purple-600 rounded-lg p-6 text-white text-center">
+        <div className="mt-8 bg-gradient-to-r from-[var(--theme-primary)] to-purple-600 rounded-lg p-6 text-white text-center">
           <h3 className="text-lg font-bold mb-2">Agrandissez votre équipe</h3>
           <p className="text-sm text-white/80 mb-4">Collaborez mieux en invitant vos proches à vos projets.</p>
-          <Link href="/family" className="inline-block bg-white text-[#f425f4] font-bold px-6 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors">
+          <Link href="/family" className="inline-block bg-white text-[var(--theme-primary)] font-bold px-6 py-2 rounded-full shadow-lg hover:bg-slate-50 transition-colors">
             Inviter des amis
           </Link>
         </div>

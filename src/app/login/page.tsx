@@ -74,7 +74,7 @@ export default function LoginPage() {
         transition={{ duration: 0.6 }}
         className="text-center mb-10"
       >
-        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-[#f425f4] to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-[#f425f4]/30 rotate-12">
+        <div className="w-20 h-20 mx-auto mb-6 bg-gradient-to-br from-[var(--theme-primary)] to-purple-600 rounded-2xl flex items-center justify-center shadow-xl shadow-[var(--theme-primary)]/30 rotate-12">
           <span className="text-white text-3xl font-black -rotate-12">Z</span>
         </div>
         <h1 className="text-3xl font-black tracking-tight text-slate-900">ZenFlow</h1>
@@ -93,7 +93,7 @@ export default function LoginPage() {
           className={cn(
             "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300",
             isLogin 
-              ? "bg-[#f425f4] text-white shadow-lg shadow-[#f425f4]/20" 
+              ? "bg-[var(--theme-primary)] text-white shadow-lg shadow-[var(--theme-primary)]/20" 
               : "text-slate-400"
           )}
         >
@@ -104,7 +104,7 @@ export default function LoginPage() {
           className={cn(
             "flex-1 py-3 rounded-xl text-sm font-bold transition-all duration-300",
             !isLogin 
-              ? "bg-[#f425f4] text-white shadow-lg shadow-[#f425f4]/20" 
+              ? "bg-[var(--theme-primary)] text-white shadow-lg shadow-[var(--theme-primary)]/20" 
               : "text-slate-400"
           )}
         >
@@ -142,7 +142,7 @@ export default function LoginPage() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Adresse email"
-            className="w-full bg-white pl-12 pr-4 py-4 rounded-2xl border border-slate-100 shadow-sm text-sm font-medium placeholder:text-slate-300 outline-none focus:border-[#f425f4]/50 focus:ring-2 focus:ring-[#f425f4]/10 transition-all"
+            className="w-full bg-white pl-12 pr-4 py-4 rounded-2xl border border-slate-100 shadow-sm text-sm font-medium placeholder:text-slate-300 outline-none focus:border-[var(--theme-primary)]/50 focus:ring-2 focus:ring-[var(--theme-primary)]/10 transition-all"
             autoComplete="email"
           />
         </div>
@@ -157,7 +157,7 @@ export default function LoginPage() {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Mot de passe"
-            className="w-full bg-white pl-12 pr-12 py-4 rounded-2xl border border-slate-100 shadow-sm text-sm font-medium placeholder:text-slate-300 outline-none focus:border-[#f425f4]/50 focus:ring-2 focus:ring-[#f425f4]/10 transition-all"
+            className="w-full bg-white pl-12 pr-12 py-4 rounded-2xl border border-slate-100 shadow-sm text-sm font-medium placeholder:text-slate-300 outline-none focus:border-[var(--theme-primary)]/50 focus:ring-2 focus:ring-[var(--theme-primary)]/10 transition-all"
             autoComplete={isLogin ? 'current-password' : 'new-password'}
           />
           <button
@@ -172,7 +172,7 @@ export default function LoginPage() {
         {/* Forgot Password */}
         {isLogin && (
           <div className="text-right">
-            <button type="button" className="text-[#f425f4] text-xs font-semibold">
+            <button type="button" className="text-[var(--theme-primary)] text-xs font-semibold">
               Mot de passe oublié ?
             </button>
           </div>
@@ -186,7 +186,7 @@ export default function LoginPage() {
           className={cn(
             "w-full py-4 rounded-2xl font-bold text-white flex items-center justify-center gap-2 shadow-lg transition-all",
             email.trim() && password.trim() && !isLoading
-              ? "bg-[#f425f4] shadow-[#f425f4]/30"
+              ? "bg-[var(--theme-primary)] shadow-[var(--theme-primary)]/30"
               : "bg-slate-300 shadow-none"
           )}
         >
@@ -218,15 +218,15 @@ export default function LoginPage() {
         disabled={isLoading}
         className="w-full bg-white py-4 rounded-2xl border border-slate-100 shadow-sm flex items-center justify-center gap-3 font-semibold text-sm text-slate-700 hover:border-slate-200 transition-all"
       >
-        <Chrome size={20} className="text-[#f425f4]" />
+        <Chrome size={20} className="text-[var(--theme-primary)]" />
         <span>Google</span>
       </motion.button>
 
       {/* Footer */}
       <p className="text-center text-xs text-slate-400 mt-8">
         En continuant, vous acceptez nos{' '}
-        <span className="text-[#f425f4] font-medium">Conditions</span> et{' '}
-        <span className="text-[#f425f4] font-medium">Politique de confidentialité</span>
+        <span className="text-[var(--theme-primary)] font-medium">Conditions</span> et{' '}
+        <span className="text-[var(--theme-primary)] font-medium">Politique de confidentialité</span>
       </p>
     </div>
   );

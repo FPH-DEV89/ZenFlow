@@ -68,7 +68,7 @@ export default function CalendarPage() {
   const categoryStyle = (cat: string) => {
     if (cat === 'work') return { border: 'border-purple-400', bg: 'bg-purple-100', text: 'text-purple-600', label: 'Travail', icon: <Briefcase size={20} /> };
     if (cat === 'shared') return { border: 'border-teal-400', bg: 'bg-teal-100', text: 'text-teal-600', label: 'Partagé', icon: <Users size={20} /> };
-    return { border: 'border-[#f425f4]', bg: 'bg-[#f425f4]/10', text: 'text-[#f425f4]', label: 'Personnel', icon: <Heart size={20} /> };
+    return { border: 'border-[var(--theme-primary)]', bg: 'bg-[var(--theme-primary)]/10', text: 'text-[var(--theme-primary)]', label: 'Personnel', icon: <Heart size={20} /> };
   };
 
   return (
@@ -76,22 +76,22 @@ export default function CalendarPage() {
       <header className="flex items-center justify-between px-6 pt-8 pb-4">
         <div className="flex flex-col">
           <h1 className="text-2xl font-bold tracking-tight">Calendrier</h1>
-          <p className="text-sm text-[#f425f4] font-medium">{MOIS[currentMonth]} {currentYear}</p>
+          <p className="text-sm text-[var(--theme-primary)] font-medium">{MOIS[currentMonth]} {currentYear}</p>
         </div>
-        <button className="w-12 h-12 rounded-full bg-[#f425f4]/10 flex items-center justify-center text-[#f425f4]">
+        <button className="w-12 h-12 rounded-full bg-[var(--theme-primary)]/10 flex items-center justify-center text-[var(--theme-primary)]">
           <Search size={24} />
         </button>
       </header>
 
       <main className="flex-1 overflow-y-auto pb-24">
         <div className="px-4 mb-6">
-          <div className="bg-white rounded-xl p-4 shadow-sm border border-[#f425f4]/5">
+          <div className="bg-white rounded-xl p-4 shadow-sm border border-[var(--theme-primary)]/5">
             <div className="flex items-center justify-between mb-4 px-2">
-              <button onClick={prevMonth} className="p-2 hover:bg-[#f425f4]/5 rounded-full transition-colors">
+              <button onClick={prevMonth} className="p-2 hover:bg-[var(--theme-primary)]/5 rounded-full transition-colors">
                 <ChevronLeft size={20} className="text-slate-600" />
               </button>
               <h2 className="text-lg font-semibold">{MOIS[currentMonth]}</h2>
-              <button onClick={nextMonth} className="p-2 hover:bg-[#f425f4]/5 rounded-full transition-colors">
+              <button onClick={nextMonth} className="p-2 hover:bg-[var(--theme-primary)]/5 rounded-full transition-colors">
                 <ChevronRight size={20} className="text-slate-600" />
               </button>
             </div>
@@ -114,16 +114,16 @@ export default function CalendarPage() {
                 >
                   {isToday(day) ? (
                     <>
-                      <div className="absolute inset-1 bg-[#f425f4] rounded-full"></div>
+                      <div className="absolute inset-1 bg-[var(--theme-primary)] rounded-full"></div>
                       <span className="text-sm font-bold text-white relative z-10">{day}</span>
                     </>
                   ) : (
-                    <span className={`text-sm font-medium ${selectedDay === day && !isToday(day) ? 'text-[#f425f4] font-bold' : ''}`}>
+                    <span className={`text-sm font-medium ${selectedDay === day && !isToday(day) ? 'text-[var(--theme-primary)] font-bold' : ''}`}>
                       {day}
                     </span>
                   )}
                   {selectedDay === day && !isToday(day) && (
-                    <div className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-[#f425f4]"></div>
+                    <div className="absolute bottom-0.5 w-1.5 h-1.5 rounded-full bg-[var(--theme-primary)]"></div>
                   )}
                 </button>
               ))}
@@ -134,7 +134,7 @@ export default function CalendarPage() {
         <div className="px-6 space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-xl font-bold">Événements du jour</h3>
-            <span className="text-[#f425f4] text-sm font-semibold">{todayTasks.length} tâche{todayTasks.length > 1 ? 's' : ''}</span>
+            <span className="text-[var(--theme-primary)] text-sm font-semibold">{todayTasks.length} tâche{todayTasks.length > 1 ? 's' : ''}</span>
           </div>
 
           {todayTasks.length === 0 && (
@@ -160,7 +160,7 @@ export default function CalendarPage() {
                   <div className="flex justify-between items-start mb-1">
                     <h4 className="font-bold text-slate-900">{task.title}</h4>
                     <Link href={`/edit-task/${task.id}`}>
-                      <MoreVertical size={16} className="text-slate-300 hover:text-[#f425f4] transition-colors" />
+                      <MoreVertical size={16} className="text-slate-300 hover:text-[var(--theme-primary)] transition-colors" />
                     </Link>
                   </div>
                   <p className="text-xs text-slate-500 mb-3">
@@ -178,7 +178,7 @@ export default function CalendarPage() {
             <div className="w-16 flex flex-col items-center pt-2">
               <span className="text-sm font-bold text-slate-300">--:--</span>
             </div>
-            <div className="flex-1 border-2 border-dashed border-slate-200 p-4 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:border-[#f425f4]/50 hover:text-[#f425f4] transition-colors cursor-pointer">
+            <div className="flex-1 border-2 border-dashed border-slate-200 p-4 rounded-xl flex items-center justify-center gap-2 text-slate-400 hover:border-[var(--theme-primary)]/50 hover:text-[var(--theme-primary)] transition-colors cursor-pointer">
               <PlusCircle size={20} />
               <span className="text-sm font-medium">Ajouter une tâche</span>
             </div>

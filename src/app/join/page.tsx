@@ -63,7 +63,7 @@ function JoinContent() {
   };
 
   if (status === 'loading') {
-    return <Loader2 className="animate-spin text-[#f425f4] mx-auto" size={48} />;
+    return <Loader2 className="animate-spin text-[var(--theme-primary)] mx-auto" size={48} />;
   }
 
   if (status === 'error') {
@@ -82,7 +82,7 @@ function JoinContent() {
 
   return (
     <div className="text-center flex flex-col items-center w-full max-w-sm">
-      <div className="w-24 h-24 bg-gradient-to-br from-fuchsia-100 to-purple-200 rounded-[2rem] flex items-center justify-center text-[#f425f4] mb-8 shadow-inner shadow-white/50 transform -rotate-3">
+      <div className="w-24 h-24 bg-gradient-to-br from-fuchsia-100 to-purple-200 rounded-[2rem] flex items-center justify-center text-[var(--theme-primary)] mb-8 shadow-inner shadow-white/50 transform -rotate-3">
         <Users size={48} strokeWidth={1.5} />
       </div>
       <h2 className="text-3xl font-black text-slate-900 mb-3">Rejoindre le foyer</h2>
@@ -92,7 +92,7 @@ function JoinContent() {
       
       <button 
          onClick={handleJoin}
-         className="w-full bg-[#f425f4] text-white font-black text-sm tracking-widest uppercase rounded-2xl py-4 flex items-center justify-center gap-2 hover:bg-[#d820d8] active:scale-95 transition-all shadow-xl shadow-[#f425f4]/30"
+         className="w-full bg-[var(--theme-primary)] text-white font-black text-sm tracking-widest uppercase rounded-2xl py-4 flex items-center justify-center gap-2 hover:bg-[var(--theme-primary-dark)] active:scale-95 transition-all shadow-xl shadow-[var(--theme-primary)]/30"
       >
         ACCEPTER L'INVITATION
       </button>
@@ -110,7 +110,7 @@ export default function JoinPage() {
   return (
     <main className="min-h-screen flex items-center justify-center p-6 bg-gradient-to-br from-[#fcfafc] to-purple-50/50">
       <div className="bg-white w-full max-w-md p-8 sm:p-10 rounded-[2.5rem] shadow-2xl shadow-purple-900/5 border border-white">
-        <Suspense fallback={<Loader2 className="animate-spin text-[#f425f4] mx-auto" size={48} />}>
+        <Suspense fallback={<Loader2 className="animate-spin text-[var(--theme-primary)] mx-auto" size={48} />}>
           <JoinContent />
         </Suspense>
       </div>
