@@ -1,13 +1,14 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { motion, PanInfo } from 'framer-motion';
 import { Briefcase, Check, Trash2, LogOut, Star, Edit2, Repeat } from 'lucide-react';
 import BottomNav from '@/components/BottomNav';
 import { getAllTasks, toggleTaskCompletion, deleteTask, type Task } from '@/lib/db';
 import { createClient } from '@/lib/supabase';
 import { useRouter } from 'next/navigation';
 import AIAssistant from '@/components/AIAssistant';
+import confetti from 'canvas-confetti';
 
 const categories = [
   { id: 'all', name: 'Toutes', color: 'bg-purple-100 text-purple-600' },
@@ -16,16 +17,147 @@ const categories = [
   { id: 'shared', name: 'Partagé', color: 'bg-emerald-100 text-emerald-600' },
 ];
 
+/* ─── Swipeable Task Card ─────────────────────────────────────────────── */
+function SwipeableTaskCard({
+  task,
+  onToggle,
+  onDelete,
+  onEdit,
+}: {
+  task: Task;
+  onToggle: (id: number, status: boolean) => void;
+  onDelete: (id: number) => void;
+  onEdit: (id: number) => void;
+}) {
+  const [swiped, setSwiped] = useState<'left' | 'right' | null>(null);
+
+  const handleDragEnd = async (_: any, info: PanInfo) => {
+    const threshold = 100;
+    if (info.offset.x > threshold && !task.completed) {
+      setSwiped('right');
+      setTimeout(() => onToggle(task.id!, task.completed), 300);
+    } else if (info.offset.x < -threshold) {
+      setSwiped('left');
+      setTimeout(() => onDelete(task.id!), 300);
+    }
+  };
+
+  return (
+    <div className="relative overflow-hidden rounded-[2rem]">
+      {/* Background indicators */}
+      <div className="absolute inset-0 flex items-center justify-between px-8 rounded-[2rem]"
+        style={{ background: swiped === 'left' ? '#fee2e2' : swiped === 'right' ? '#d1fae5' : '#f1f5f9' }}>
+        <span className="text-emerald-500 font-bold text-sm">✓ Terminée</span>
+        <span className="text-red-500 font-bold text-sm">✕ Supprimer</span>
+      </div>
+      
+      {/* Foreground card */}
+      <motion.div
+        drag="x"
+        dragConstraints={{ left: 0, right: 0 }}
+        dragElastic={0.4}
+        onDragEnd={handleDragEnd}
+        animate={swiped === 'right' ? { x: 400, opacity: 0 } : swiped === 'left' ? { x: -400, opacity: 0 } : { x: 0 }}
+        transition={{ type: 'spring', damping: 20 }}
+        layout
+        initial={{ opacity: 0, scale: 0.95 }}
+        className="group flex items-center gap-4 bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-xl hover:shadow-purple-500/5 transition-shadow duration-300 cursor-grab active:cursor-grabbing relative z-10"
+      >
+        <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
+          task.category === 'work' ? 'bg-blue-50' : 
+          task.category === 'personal' ? 'bg-pink-50' : 'bg-emerald-50'
+        }`}>
+          <Briefcase className={`w-6 h-6 stroke-[2.5px] ${
+            task.category === 'work' ? 'text-blue-500' : 
+            task.category === 'personal' ? 'text-pink-500' : 'text-emerald-500'
+          }`} />
+        </div>
+        <div className="flex-1 min-w-0">
+          <h4 className={`font-bold text-gray-800 truncate text-base ${task.completed ? 'line-through text-gray-300' : ''}`}>
+            {task.title}
+          </h4>
+          <p className="text-xs text-gray-400 flex items-center gap-2 mt-1 font-semibold">
+            {task.priority === 'high' && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
+            {task.priority === 'medium' && <span className="w-2 h-2 bg-orange-500 rounded-full" />}
+            <span className="uppercase tracking-wider">{task.priority === 'high' ? 'URGENT' : task.priority}</span>
+            <span className="w-1 h-1 bg-gray-200 rounded-full" />
+            <span className="uppercase tracking-wider">{categories.find(c => c.id === task.category)?.name}</span>
+            {task.recurrence && (
+              <>
+                <span className="w-1 h-1 bg-gray-200 rounded-full" />
+                <Repeat size={12} className="text-indigo-500" />
+                <span className="text-indigo-500 font-bold lowercase tracking-normal">
+                  {task.recurrence === 'daily' ? 'chaque jour' : task.recurrence === 'weekly' ? 'toutes les sem.' : 'chaque mois'}
+                </span>
+              </>
+            )}
+          </p>
+          
+          {task.subtasks_total ? task.subtasks_total > 0 && (
+            <div className="mt-3 space-y-1.5">
+              <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                <span className="flex items-center gap-1">
+                  <Check size={10} className="text-emerald-500" /> 
+                  {Math.round((task.subtasks_completed! / task.subtasks_total!) * 100)}%
+                </span>
+                <span>{task.subtasks_completed}/{task.subtasks_total} étapes</span>
+              </div>
+              <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
+                <motion.div 
+                  initial={{ width: 0 }}
+                  animate={{ width: `${(task.subtasks_completed! / task.subtasks_total!) * 100}%` }}
+                  className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
+                />
+              </div>
+            </div>
+          ) : null}
+        </div>
+        <div className="flex items-center gap-2">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onToggle(task.id!, task.completed); }}
+            className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
+              task.completed 
+              ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-200' 
+              : 'border-purple-100 hover:border-purple-400 bg-slate-50/50'
+            }`}
+          >
+            {task.completed && <Check className="text-white w-5 h-5 stroke-[3px]" />}
+          </button>
+          {!task.completed && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onEdit(task.id!); }}
+              className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-300 hover:text-blue-500 hover:bg-blue-100 transition-all opacity-0 group-hover:opacity-100"
+            >
+              <Edit2 className="w-4 h-4" />
+            </button>
+          )}
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(task.id!); }}
+            className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-100 transition-all opacity-0 group-hover:opacity-100"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      </motion.div>
+    </div>
+  );
+}
+
+/* ─── Main Page ───────────────────────────────────────────────────────── */
 export default function Home() {
   const [tasks, setTasks] = useState<Task[]>([]);
   const [filter, setFilter] = useState('all');
   const [user, setUser] = useState<any>(null);
+  const [isLoadingTasks, setIsLoadingTasks] = useState(true);
+  const prevAllCompletedRef = useRef(false);
   const router = useRouter();
   const supabase = createClient();
 
   const fetchTasks = async () => {
+    setIsLoadingTasks(true);
     const data = await getAllTasks();
     setTasks(data);
+    setIsLoadingTasks(false);
   };
 
   useEffect(() => {
@@ -55,6 +187,21 @@ export default function Home() {
     await supabase.auth.signOut();
     router.push('/login');
   };
+
+  // 🎉 Confetti celebration when ALL tasks are completed
+  useEffect(() => {
+    if (tasks.length === 0) return;
+    const allCompleted = tasks.every(t => t.completed);
+    if (allCompleted && !prevAllCompletedRef.current) {
+      confetti({
+        particleCount: 120,
+        spread: 80,
+        origin: { y: 0.6 },
+        colors: ['#a855f7', '#f425f4', '#ec4899', '#22c55e', '#fbbf24']
+      });
+    }
+    prevAllCompletedRef.current = allCompleted;
+  }, [tasks]);
 
   const filteredTasks = filter === 'all' 
     ? tasks 
@@ -127,7 +274,7 @@ export default function Home() {
               Bonjour, votre charge mentale <br /> <span className="text-purple-600 underline decoration-purple-100 underline-offset-4">{mentalLoadText}</span>
             </h2>
             <p className="text-gray-400 text-sm mt-3 font-medium">
-              Il vous reste {tasks.filter(t => !t.completed).length} tâche{tasks.filter(t => !t.completed).length > 1 ? 's' : ''} pour aujourd'hui
+              Il vous reste {tasks.filter(t => !t.completed).length} tâche{tasks.filter(t => !t.completed).length > 1 ? 's' : ''} pour aujourd&apos;hui
             </p>
           </div>
         </section>
@@ -164,91 +311,27 @@ export default function Home() {
           </div>
 
           <div className="space-y-4">
-            {filteredTasks.length > 0 ? (
+            {isLoadingTasks ? (
+              // ── Skeleton Loaders ──
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm animate-pulse">
+                  <div className="w-14 h-14 rounded-2xl bg-slate-100" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 bg-slate-100 rounded-lg w-3/4" />
+                    <div className="h-3 bg-slate-50 rounded-lg w-1/2" />
+                  </div>
+                  <div className="w-9 h-9 rounded-full bg-slate-100" />
+                </div>
+              ))
+            ) : filteredTasks.length > 0 ? (
               filteredTasks.map((task) => (
-                <motion.div 
-                  layout
-                  initial={{ opacity: 0, scale: 0.95 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  key={task.id} 
-                  className="group flex items-center gap-4 bg-white p-5 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-xl hover:shadow-purple-500/5 transition-all duration-300"
-                >
-                  <div className={`w-14 h-14 rounded-2xl flex items-center justify-center transition-colors ${
-                    task.category === 'work' ? 'bg-blue-50' : 
-                    task.category === 'personal' ? 'bg-pink-50' : 'bg-emerald-50'
-                  }`}>
-                    <Briefcase className={`w-6 h-6 stroke-[2.5px] ${
-                      task.category === 'work' ? 'text-blue-500' : 
-                      task.category === 'personal' ? 'text-pink-500' : 'text-emerald-500'
-                    }`} />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <h4 className={`font-bold text-gray-800 truncate text-base ${task.completed ? 'line-through text-gray-300' : ''}`}>
-                      {task.title}
-                    </h4>
-                    <p className="text-xs text-gray-400 flex items-center gap-2 mt-1 font-semibold">
-                      {task.priority === 'high' && <span className="w-2 h-2 bg-red-500 rounded-full animate-pulse" />}
-                      {task.priority === 'medium' && <span className="w-2 h-2 bg-orange-500 rounded-full" />}
-                      <span className="uppercase tracking-wider">{task.priority === 'high' ? 'URGENT' : task.priority}</span>
-                      <span className="w-1 h-1 bg-gray-200 rounded-full" />
-                      <span className="uppercase tracking-wider">{categories.find(c => c.id === task.category)?.name}</span>
-                      {task.recurrence && (
-                        <>
-                          <span className="w-1 h-1 bg-gray-200 rounded-full" />
-                          <Repeat size={12} className="text-indigo-500" />
-                          <span className="text-indigo-500 font-bold lowercase tracking-normal">
-                            {task.recurrence === 'daily' ? 'chaque jour' : task.recurrence === 'weekly' ? 'toutes les sem.' : 'chaque mois'}
-                          </span>
-                        </>
-                      )}
-                    </p>
-                    
-                    {task.subtasks_total ? task.subtasks_total > 0 && (
-                      <div className="mt-3 space-y-1.5">
-                        <div className="flex items-center justify-between text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                          <span className="flex items-center gap-1">
-                            <Check size={10} className="text-emerald-500" /> 
-                            {Math.round((task.subtasks_completed! / task.subtasks_total!) * 100)}%
-                          </span>
-                          <span>{task.subtasks_completed}/{task.subtasks_total} étapes</span>
-                        </div>
-                        <div className="h-1.5 w-full bg-slate-100 rounded-full overflow-hidden">
-                          <motion.div 
-                            initial={{ width: 0 }}
-                            animate={{ width: `${(task.subtasks_completed! / task.subtasks_total!) * 100}%` }}
-                            className="h-full bg-gradient-to-r from-purple-400 to-purple-600 rounded-full"
-                          />
-                        </div>
-                      </div>
-                    ) : null}
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <button 
-                      onClick={() => handleToggle(task.id!, task.completed)}
-                      className={`w-9 h-9 rounded-full border-2 flex items-center justify-center transition-all duration-300 ${
-                        task.completed 
-                        ? 'bg-emerald-500 border-emerald-500 shadow-lg shadow-emerald-200' 
-                        : 'border-purple-100 hover:border-purple-400 bg-slate-50/50'
-                      }`}
-                    >
-                      {task.completed && <Check className="text-white w-5 h-5 stroke-[3px]" />}
-                    </button>
-                    {!task.completed && (
-                      <button 
-                        onClick={() => router.push(`/edit-task/${task.id}`)}
-                        className="w-9 h-9 rounded-full bg-blue-50 flex items-center justify-center text-blue-300 hover:text-blue-500 hover:bg-blue-100 transition-all opacity-0 group-hover:opacity-100"
-                      >
-                        <Edit2 className="w-4 h-4" />
-                      </button>
-                    )}
-                    <button 
-                      onClick={() => handleDelete(task.id!)}
-                      className="w-9 h-9 rounded-full bg-red-50 flex items-center justify-center text-red-300 hover:text-red-500 hover:bg-red-100 transition-all opacity-0 group-hover:opacity-100"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
-                </motion.div>
+                <SwipeableTaskCard
+                  key={task.id}
+                  task={task}
+                  onToggle={handleToggle}
+                  onDelete={handleDelete}
+                  onEdit={(id: number) => router.push(`/edit-task/${id}`)}
+                />
               ))
             ) : (
               <div className="text-center py-16 bg-white rounded-[2.5rem] border-2 border-dashed border-purple-50">
